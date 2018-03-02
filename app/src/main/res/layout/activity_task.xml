@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include layout="@layout/layout_toolbar"/>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:id="@+id/info">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dp">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:id="@+id/picture"
+                android:src="@drawable/img_bg"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sharvari Divekar"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="5dp"
+                android:id="@+id/name"
+                android:textSize="16dp"
+                android:textColor="@color/colorPrimary"
+                android:layout_toRightOf="@+id/picture"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6 days left"
+                android:textSize="12dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="20dp"
+                android:layout_below="@+id/name"
+                android:id="@+id/leftDays"
+                android:layout_toRightOf="@+id/picture"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="16 Request"
+                android:textSize="12dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="20dp"
+                android:layout_below="@+id/name"
+                android:id="@+id/requestCount"
+                android:layout_toRightOf="@+id/leftDays"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Need a home cook"
+                android:textSize="14dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_below="@+id/leftDays"
+                android:layout_toRightOf="@+id/picture"/>
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:id="@+id/request"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ic_request"/>
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/picture"
+                android:layout_marginTop="10dp"
+                android:id="@+id/description"
+                android:text="Looking for a cook who can come home twice a day and cook varity of food."/>
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:id="@+id/icon_home"
+                android:layout_below="@+id/description"
+                android:src="@drawable/ic_home"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Parel, Mumbai"
+                android:layout_marginTop="5dp"
+                android:layout_below="@+id/description"
+                android:layout_toRightOf="@+id/icon_home"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:layout_marginTop="5dp"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/description"
+                android:id="@+id/amount"
+                android:textColor="@android:color/holo_green_dark"
+                android:text="$300 per month"/>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/info"
+        android:id="@+id/recycler_view"/>
+</RelativeLayout>

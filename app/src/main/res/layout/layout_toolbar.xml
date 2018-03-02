@@ -6,6 +6,6 @@
     android:layout_height="?android:attr/actionBarSize"
     android:minHeight="?attr/actionBarSize"
     android:background="@drawable/gradient_bg"
-    local:title="Dashboard"
+    local:title="Engross Womenhood"
     local:titleTextColor="#FFF"
     local:popupTheme="@style/ThemeOverlay.AppCompat.Light" />

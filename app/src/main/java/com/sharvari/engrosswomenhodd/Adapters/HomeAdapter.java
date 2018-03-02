@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.sharvari.engrosswomenhodd.Activities.ProfileActivity;
+import com.sharvari.engrosswomenhodd.Activities.TaskActivity;
 import com.sharvari.engrosswomenhodd.Fragments.HomeFragment;
 import com.sharvari.engrosswomenhodd.Pojos.home;
 import com.sharvari.engrosswomenhodd.R;
@@ -48,6 +49,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(context, ProfileActivity.class);
+                context.startActivity(i);
+            }
+        });
+        holder.more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(context, TaskActivity.class);
                 context.startActivity(i);
             }
         });

@@ -1,128 +1,244 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark">
-    <RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/layout_details"
+        android:background="@drawable/gradient_bg">
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:id="@+id/picture"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/img_women"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sharvari Divekar"
+            android:textColor="@color/colorWhite"
+            android:textAlignment="center"
+            android:textSize="18dp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/layout"
-            android:background="@drawable/gradient_bg">
-            <ImageView
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitXY"
-                android:id="@+id/picture"
-                android:layout_marginTop="15dp"
-                android:layout_gravity="center_horizontal"
-                android:src="@drawable/img_women"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sharvari Divekar"
-                android:textColor="@color/colorWhite"
-                android:textAlignment="center"
-                android:textSize="18dp"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:weightSum="3">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp"
-                android:weightSum="3">
-                <LinearLayout
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="30"
-                        android:textSize="14dp"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorWhite" />
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Task Done"
-                        android:textSize="14dp"
-                        android:textColor="@color/colorWhite"
-                        android:textAlignment="center"/>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="0.5dp"
-                    android:layout_height="match_parent"
-                    android:textColor="@color/colorWhite"/>
-
-                <LinearLayout
+                    android:text="30"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorWhite" />
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="30"
-                        android:textSize="14dp"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorWhite" />
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Followers"
-                        android:textSize="14dp"
-                        android:textColor="@color/colorWhite"
-                        android:textAlignment="center"/>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:textColor="@color/colorWhite"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="30"
-                        android:textSize="14dp"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorWhite" />
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Following"
-                        android:textSize="14dp"
-                        android:textColor="@color/colorWhite"
-                        android:textAlignment="center"/>
-                </LinearLayout>
+                    android:text="Task Done"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorWhite"
+                    android:textAlignment="center"/>
             </LinearLayout>
-            <RatingBar
-                android:id="@+id/ratingBar1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:focusable="false"
-                android:rating="4.5"
-                android:secondaryProgressTint="@color/colorPrimaryDark"
-                android:progressTint="@color/colorWhite"
-                android:layout_marginTop="10dp" />
-        </LinearLayout>
 
-        <include android:layout_below="@+id/layout"
-            layout="@layout/layout_personal_details"
-            android:layout_height="match_parent"
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:textColor="@color/colorWhite"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="30"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorWhite" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Followers"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorWhite"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:textColor="@color/colorWhite"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="30"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorWhite" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Following"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorWhite"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+        </LinearLayout>
+        <RatingBar
+            android:id="@+id/ratingBar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:focusable="false"
+            android:rating="4.5"
+            android:secondaryProgressTint="@color/colorPrimaryDark"
+            android:progressTint="@color/colorWhite"
+            android:layout_marginTop="10dp" />
+    </LinearLayout>
+
+    <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layout_details">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_margin="15dp"/>
-    </RelativeLayout>
-</android.support.v4.widget.NestedScrollView>
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/layout_profile">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Edit Profile"
+                        android:textSize="18dp"/>
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_right_arrow"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/layout_password">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Change Password"
+                        android:textSize="18dp"/>
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_right_arrow"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/layout_address">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Add/Edit Address"
+                        android:textSize="18dp"/>
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_right_arrow"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/layout_invite">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Invite a Friend"
+                        android:textSize="18dp"/>
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_right_arrow"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/colorWhite"
+                android:background="@drawable/gradient_bg"/>
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+    <!--<include android:layout_below="@+id/layout"
+        layout="@layout/layout_personal_details"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_margin="15dp"/>-->
+
+</RelativeLayout>

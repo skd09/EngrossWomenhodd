@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <RelativeLayout
         android:layout_width="match_parent"
@@ -20,11 +21,76 @@
             android:layout_height="30dp"
             android:src="@drawable/ic_right_arrow_white"
             android:rotation="90"
+            android:id="@+id/img"
             android:layout_alignParentRight="true"
             android:layout_margin="10dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/img"
+            android:padding="5dp"
+            android:id="@+id/layout_distance"
+            android:visibility="gone"
+            android:weightSum="4">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="5 Kms"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textColor="@color/colorWhite"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="15 Kms"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textColor="@color/colorWhite"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="25 Kms"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textColor="@color/colorWhite"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="40 Kms"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textColor="@color/colorWhite"/>
+        </LinearLayout>
     </RelativeLayout>
-    <android.support.v7.widget.RecyclerView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/recycler_view"/>
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ss.com.bannerslider.views.BannerSlider
+                android:id="@+id/banner"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                app:animateIndicators="true"
+                app:defaultIndicators="circle"
+                app:interval="2000"
+                app:loopSlides="true"/>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recycler_view"/>
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
 </LinearLayout>

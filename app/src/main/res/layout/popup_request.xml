@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="30dp"
+    android:id="@+id/popup"
+    android:orientation="vertical">
+
+
+    <!--<TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorWhite"
+        android:text="Close"
+        android:id="@+id/close"
+        android:textAlignment="viewEnd"
+        android:textStyle="bold"
+        android:layout_marginBottom="5dp"
+        android:textSize="18dp"/>-->
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:hint="Your Charge"
+        android:inputType="number"
+        android:background="@color/colorLightGray"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:hint="Why to accept you?"
+        android:layout_marginTop="10dp"
+        android:lines="5"
+        android:background="@color/colorLightGray"/>
+    <!--<Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:background="@drawable/gradient_bg"/>-->
+
+</LinearLayout>

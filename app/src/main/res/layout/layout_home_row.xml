@@ -29,15 +29,26 @@
             android:layout_toRightOf="@+id/picture"/>
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="28/02/2018"
+            android:text="6 days left"
             android:textSize="12dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="20dp"
             android:layout_below="@+id/name"
-            android:id="@+id/date"
+            android:id="@+id/leftDays"
             android:layout_toRightOf="@+id/picture"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="16 Request"
+            android:textSize="12dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="20dp"
+            android:layout_below="@+id/name"
+            android:id="@+id/request"
+            android:layout_toRightOf="@+id/leftDays"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -46,7 +57,7 @@
             android:textSize="14dp"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="5dp"
-            android:layout_below="@+id/date"
+            android:layout_below="@+id/leftDays"
             android:layout_toRightOf="@+id/picture"/>
 
         <ImageView
