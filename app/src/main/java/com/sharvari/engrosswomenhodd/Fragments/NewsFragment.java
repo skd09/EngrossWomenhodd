@@ -15,10 +15,15 @@ import android.view.ViewGroup;
 import com.sharvari.engrosswomenhodd.Adapters.NewsAdapter;
 import com.sharvari.engrosswomenhodd.Pojos.News;
 import com.sharvari.engrosswomenhodd.R;
+import com.sharvari.engrosswomenhodd.Realm.NewsFeed;
+import com.sharvari.engrosswomenhodd.Utils.RealmController;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import io.realm.RealmResults;
 import ss.com.bannerslider.banners.Banner;
 import ss.com.bannerslider.banners.DrawableBanner;
 import ss.com.bannerslider.banners.RemoteBanner;
@@ -39,7 +44,7 @@ public class NewsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_news, container, false);
 
         recyclerView = v.findViewById(R.id.recycler_view);
-        adapter = new NewsAdapter(arrayList);
+        adapter = new NewsAdapter(arrayList, getContext());
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -64,34 +69,19 @@ public class NewsFragment extends Fragment {
 
     private void prepareData() {
 
-        News n = new News();
-        arrayList.add(n);
+        RealmResults<NewsFeed> news = RealmController.with(this).getUploadNews();
 
-        n = new News();
-        arrayList.add(n);
+        if(news.size()>0) {
+            for (NewsFeed newsFeed : news) {
+                Date d = new Date(newsFeed.getCreatedOn());
+                String date = new SimpleDateFormat("dd/MM/yyyy").format(d);
+                News n = new News(newsFeed.getTitle(), newsFeed.getStory(), newsFeed.getPicture(), date);
+                arrayList.add(n);
 
-        n = new News();
-        arrayList.add(n);
+            }
 
-        n = new News();
-        arrayList.add(n);
-
-        n = new News();
-        arrayList.add(n);
-
-        n = new News();
-        arrayList.add(n);
-
-        n = new News();
-        arrayList.add(n);
-
-        n = new News();
-        arrayList.add(n);
-
-        n = new News();
-        arrayList.add(n);
-
-        adapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
+        }
     }
 
 }

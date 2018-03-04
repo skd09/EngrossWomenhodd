@@ -3,6 +3,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:id="@+id/linear"
     android:background="@drawable/gradient_bg">
 
     <TextView
@@ -32,18 +33,21 @@
         android:layout_margin="25dp"
         android:orientation="vertical"
         android:id="@+id/login_field_layout">
+
+
         <EditText
+            android:id="@+id/et_full_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:hint="Full Name"
-            android:textSize="14dp"
-            android:paddingTop="10dp"
+            android:inputType="text"
             android:paddingBottom="10dp"
-            android:paddingRight="15dp"
             android:paddingLeft="15dp"
-            android:inputType="number"
-            android:id="@+id/et_full_name"/>
+            android:paddingRight="15dp"
+            android:paddingTop="10dp"
+            android:textSize="14dp" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
@@ -152,16 +156,16 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:padding="10dp"
+        android:id="@+id/radio"
+        android:orientation="horizontal"
         android:layout_marginRight="25dp"
         android:layout_marginLeft="25dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
+                android:id="@+id/personal"
+                android:checked="true"
                 android:buttonTint="@color/colorWhite"
                 android:text="Personal"/>
             <RadioButton
@@ -169,16 +173,17 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
                 android:text="Entrepreneur"
+                android:id="@+id/business"
                 android:buttonTint="@color/colorWhite"
                 android:layout_marginRight="5dp"
                 android:layout_marginLeft="5dp"/>
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/both"
                 android:buttonTint="@color/colorWhite"
                 android:textColor="@color/colorWhite"
                 android:text="Both"/>
-        </LinearLayout>
     </RadioGroup>
     <LinearLayout
         android:layout_width="match_parent"

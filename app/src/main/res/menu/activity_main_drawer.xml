@@ -21,9 +21,17 @@
             android:icon="@drawable/menu_my_task"
             android:title="My Task" />
         <item
+            android:id="@+id/nav_upload_news"
+            android:icon="@drawable/menu_news"
+            android:title="Upload News" />
+        <item
             android:id="@+id/nav_news"
             android:icon="@drawable/menu_news"
             android:title="News" />
+        <item
+            android:id="@+id/nav_see_feedback"
+            android:icon="@drawable/menu_feedback"
+            android:title="Users Feedback" />
         <item
             android:id="@+id/nav_feedback"
             android:icon="@drawable/menu_feedback"

@@ -12,7 +12,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +24,9 @@ import android.widget.Toast;
 import com.sharvari.engrosswomenhodd.Adapters.AddressAdapter;
 import com.sharvari.engrosswomenhodd.Pojos.Address;
 import com.sharvari.engrosswomenhodd.R;
+import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.ArrayList;
 
@@ -36,6 +43,12 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
     private ArrayList<Address> addresses = new ArrayList<>();
     private FloatingActionButton fab;
     private TextView textAddress;
+    private EditText name,mobile,skills, about;
+    private SharedPreference preference;
+
+    private RadioGroup radioGroup;
+    private RadioButton personal, business, both;
+    private Button update;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,7 +60,8 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        String page = getIntent().getExtras().getString("Page");
+        final String page = getIntent().getExtras().getString("Page");
+        preference = new SharedPreference(this);
 
         t.setTitle(page);
         //t.setNavigationIcon(R.drawable.ic_left_arrow_white);
@@ -67,6 +81,7 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
         recyclerView = findViewById(R.id.recycler_view);
         fab = findViewById(R.id.fab);
         textAddress = findViewById(R.id.textAddress);
+        update = findViewById(R.id.update);
 
         adapter = new AddressAdapter(addresses);
 
@@ -87,18 +102,65 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
                 Toast.makeText(getApplicationContext(), "New address inserted. Don't forget to update it.", Toast.LENGTH_LONG).show();
             }
         });
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(page.equals("Edit Profile")){
+                    RadioButton radioButton = (RadioButton) findViewById(radioGroup.getCheckedRadioButtonId());
+                    RealmController.with(EditPersonalDetailsActivity.this).updateProfileData(preference.getUserId(),
+                            name.getText().toString(),
+                            mobile.getText().toString(),
+                            skills.getText().toString(),
+                            about.getText().toString(),
+                            radioButton.getText().toString());
+                    preference.createLoginSession(name.getText().toString(),mobile.getText().toString(),preference.getUserId());
+                }else if(page.equals("Change Password")){
+
+                }else if(page.equals("Update Address")){
+
+
+                }else if(page.equals("Invite a Friend")){
+
+                }
+                Toast.makeText(EditPersonalDetailsActivity.this, "Details updated.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
 
         selectedPage(page);
         setAddressData();
     }
 
     private void selectedPage(String page){
-
+        Users users = RealmController.with(this).getCustomerDetails(preference.getUserId());
         if(page.equals("Edit Profile")){
             layout_address.setVisibility(View.GONE);
             layout_password.setVisibility(View.GONE);
             layout_invite.setVisibility(View.GONE);
             layout_profile.setVisibility(View.VISIBLE);
+
+            name = findViewById(R.id.name);
+            mobile = findViewById(R.id.mobile);
+            skills = findViewById(R.id.skills);
+            about = findViewById(R.id.about);
+
+            radioGroup = findViewById(R.id.radioGroup);
+            personal = findViewById(R.id.personal);
+            business = findViewById(R.id.business);
+            both = findViewById(R.id.both);
+
+            name.setText(users.getFullName());
+            mobile.setText(users.getMobile());
+            skills.setText(users.getKeySkills());
+            about.setText(users.getAbout());
+            if(users.getAccountType().equals("Personal")){
+                personal.setChecked(true);
+            }else if(users.getAccountType().equals("Business")){
+                business.setChecked(true);
+            }else if(users.getAccountType().equals("Both")){
+                both.setChecked(true);
+            }
+
         }else if(page.equals("Change Password")){
             layout_address.setVisibility(View.GONE);
             layout_password.setVisibility(View.VISIBLE);

@@ -21,9 +21,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sharvari Divekar"
             android:textColor="@color/colorWhite"
             android:textAlignment="center"
+            android:id="@+id/name"
             android:textSize="18dp"/>
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,7 +39,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="30"
+                    android:text="0"
+                    android:id="@+id/totalTask"
                     android:textSize="14dp"
                     android:textAlignment="center"
                     android:textColor="@color/colorWhite" />
@@ -65,8 +66,9 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="30"
+                    android:text="0"
                     android:textSize="14dp"
+                    android:id="@+id/followers"
                     android:textAlignment="center"
                     android:textColor="@color/colorWhite" />
                 <TextView
@@ -91,7 +93,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="30"
+                    android:text="0"
+                    android:id="@+id/following"
                     android:textSize="14dp"
                     android:textAlignment="center"
                     android:textColor="@color/colorWhite" />
