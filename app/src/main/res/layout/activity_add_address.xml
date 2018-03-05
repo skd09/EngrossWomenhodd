@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_bg"
+    android:isScrollContainer="true"
+    android:id="@+id/layout">
+    <include layout="@layout/layout_personal_details"
+        android:id="@+id/layout_details"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add address"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/colorWhite"
+        android:id="@+id/add"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/layout_details"/>
+</RelativeLayout>

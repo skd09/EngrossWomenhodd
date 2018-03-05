@@ -26,6 +26,7 @@
         <activity android:name=".Activities.ProfileActivity"/>
         <activity android:name=".Activities.EditPersonalDetailsActivity"/>
         <activity android:name=".Activities.TaskActivity"/>
+        <activity android:name=".Activities.AddressAddActivity"/>
     </application>
 
 </manifest>

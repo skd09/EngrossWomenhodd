@@ -10,6 +10,7 @@ import com.sharvari.engrosswomenhodd.Realm.Feedback;
 import com.sharvari.engrosswomenhodd.Realm.Follow;
 import com.sharvari.engrosswomenhodd.Realm.NewsFeed;
 import com.sharvari.engrosswomenhodd.Realm.TaskRequest;
+import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
 
 import java.util.ArrayList;
@@ -107,6 +108,10 @@ public class RealmController {
         return realm.where(NewsFeed.class).findAll();
     }
 
+    public RealmResults<UserDetails> getUserAddress(String userId){
+        return realm.where(UserDetails.class).equalTo("UserId", userId).findAll();
+    }
+
     public ArrayList<SeeFeedback> getFeedbackList(){
         ArrayList<SeeFeedback> seeFeedbacks = new ArrayList<>();
         RealmResults<Feedback> feedbackRealmResults = realm.where(Feedback.class).findAll();
@@ -143,6 +148,19 @@ public class RealmController {
         users.setKeySkills(skills);
         users.setAccountType(type);
         users.setMobile(mobile);
+        realm.copyToRealmOrUpdate(users);
+        realm.commitTransaction();
+    }
+
+    public void updateUserDetails(UserDetails details){
+        realm.beginTransaction();
+        realm.insert(details);
+        realm.commitTransaction();
+    }
+    public void updateProfilePassword(String userId,String password){
+        realm.beginTransaction();
+        Users users =  realm.where(Users.class).equalTo("UserId",userId).findFirst();
+        users.setPassword(password);
         realm.copyToRealmOrUpdate(users);
         realm.commitTransaction();
     }
