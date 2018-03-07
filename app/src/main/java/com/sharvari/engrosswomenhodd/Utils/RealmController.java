@@ -2,13 +2,14 @@ package com.sharvari.engrosswomenhodd.Utils;
 
 import android.app.Activity;
 import android.app.Application;
-import android.icu.text.SimpleDateFormat;
 import android.support.v4.app.Fragment;
 
 import com.sharvari.engrosswomenhodd.Pojos.SeeFeedback;
+import com.sharvari.engrosswomenhodd.Realm.Category;
 import com.sharvari.engrosswomenhodd.Realm.Feedback;
 import com.sharvari.engrosswomenhodd.Realm.Follow;
 import com.sharvari.engrosswomenhodd.Realm.NewsFeed;
+import com.sharvari.engrosswomenhodd.Realm.Task;
 import com.sharvari.engrosswomenhodd.Realm.TaskRequest;
 import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
@@ -16,7 +17,6 @@ import com.sharvari.engrosswomenhodd.Realm.Users;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
-import java.util.logging.SimpleFormatter;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -108,8 +108,16 @@ public class RealmController {
         return realm.where(NewsFeed.class).findAll();
     }
 
+    public RealmResults<Category> getCategory(){
+        return realm.where(Category.class).findAll();
+    }
+
     public RealmResults<UserDetails> getUserAddress(String userId){
         return realm.where(UserDetails.class).equalTo("UserId", userId).findAll();
+    }
+
+    public UserDetails getUserAddressDetails(String userDetailsId){
+        return realm.where(UserDetails.class).equalTo("UserDetailsId", userDetailsId).findFirst();
     }
 
     public ArrayList<SeeFeedback> getFeedbackList(){
@@ -152,17 +160,70 @@ public class RealmController {
         realm.commitTransaction();
     }
 
-    public void updateUserDetails(UserDetails details){
+    public void removeUserDetails(int position, String userId){
+        RealmResults<UserDetails> detail = realm.where(UserDetails.class).equalTo("UserId",userId).findAll();
+        UserDetails d = detail.get(position);
+        realm.beginTransaction();
+        d.deleteFromRealm();
+        realm.commitTransaction();
+    }
+
+    public void inertUserDetails(UserDetails details){
         realm.beginTransaction();
         realm.insert(details);
         realm.commitTransaction();
     }
+
+    public void updateUserDetails(UserDetails details, int position){
+        RealmResults<UserDetails> detail = realm.where(UserDetails.class).equalTo("UserId",details.getUserId()).findAll();
+
+        UserDetails d = detail.get(position);
+        realm.beginTransaction();
+        d.setAddressType(details.getAddressType());
+        d.setAddress(details.getAddress());
+        d.setLandmark(details.getLandmark());
+        d.setArea(details.getArea());
+        d.setCity(details.getCity());
+        d.setCountry(details.getCountry());
+        d.setPincode(details.getPincode());
+        d.setUpdatedOn(d.getUpdatedOn());
+        realm.insertOrUpdate(d);
+        realm.commitTransaction();
+    }
+
     public void updateProfilePassword(String userId,String password){
         realm.beginTransaction();
         Users users =  realm.where(Users.class).equalTo("UserId",userId).findFirst();
         users.setPassword(password);
         realm.copyToRealmOrUpdate(users);
         realm.commitTransaction();
+    }
+
+    public  void insertTask(Task task){
+        realm.beginTransaction();
+        realm.copyToRealm(task);
+        realm.commitTransaction();
+    }
+
+    public RealmResults<Task> getMyTask(String userId){
+        return realm.where(Task.class).equalTo("UserId",userId).findAll();
+    }
+
+    public RealmResults<Task> getAllTask(String myUserId){
+        return realm.where(Task.class)
+                .notEqualTo("UserId",myUserId)
+                .findAll();
+    }
+
+    public RealmResults<TaskRequest> getRequest(String taskId){
+        return realm.where(TaskRequest.class)
+                .notEqualTo("TaskId",taskId)
+                .findAll();
+    }
+    public int getRequestCount(String taskId){
+        return realm.where(TaskRequest.class)
+                .notEqualTo("TaskId",taskId)
+                .findAll().size();
     }
 
     private String dateFormat(Long date){

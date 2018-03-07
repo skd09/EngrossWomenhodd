@@ -55,6 +55,7 @@
             android:layout_height="wrap_content"
             android:text="Need a home cook"
             android:textSize="14dp"
+            android:id="@+id/title"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="5dp"
             android:layout_below="@+id/leftDays"
@@ -91,6 +92,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Parel, Mumbai"
+            android:id="@+id/location"
             android:layout_marginBottom="5dp"
             android:layout_alignParentBottom="true"
             android:layout_toRightOf="@+id/icon_home"/>

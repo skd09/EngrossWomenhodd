@@ -17,6 +17,8 @@ import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.UUID;
 
+import io.realm.RealmResults;
+
 /**
  * Created by sharvari on 05-Mar-18.
  */
@@ -27,6 +29,7 @@ public class AddressAddActivity extends AppCompatActivity{
     private RelativeLayout layout;
     private SharedPreference preference;
     private String addressType;
+    private String position;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,7 +39,6 @@ public class AddressAddActivity extends AppCompatActivity{
         preference = new SharedPreference(this);
 
         addressType = getIntent().getExtras().getString("Type");
-        Toast.makeText(this, addressType, Toast.LENGTH_SHORT).show();
 
         type = findViewById(R.id.type);
         address = findViewById(R.id.address);
@@ -48,12 +50,32 @@ public class AddressAddActivity extends AppCompatActivity{
         add = findViewById(R.id.add);
         layout = findViewById(R.id.layout);
         /*Toast.makeText(this, "All fields are mandatory", Toast.LENGTH_SHORT).show();*/
+
+        if(addressType.equals("Update")){
+            position = getIntent().getExtras().getString("Position");
+            setData();
+        }
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 validateData();
             }
         });
+    }
+
+    private void setData(){
+        RealmResults<UserDetails> details = RealmController.with(this).getUserAddress(preference.getUserId());
+
+        int pos = Integer.parseInt(position);
+
+        type.setText(details.get(pos).getAddressType());
+        address.setText(details.get(pos).getAddress());
+        landmark.setText(details.get(pos).getLandmark());
+        area.setText(details.get(pos).getArea());
+        city.setText(details.get(pos).getCity());
+        pincode.setText(details.get(pos).getPincode());
+        country.setText(details.get(pos).getCountry());
+
     }
 
     private void validateData(){
@@ -79,23 +101,41 @@ public class AddressAddActivity extends AppCompatActivity{
             Snackbar.make(layout, "Enter country",Snackbar.LENGTH_SHORT).show();
             return;
         }
-
-        UserDetails details = new UserDetails(
-                UUID.randomUUID().toString(),
-                preference.getUserId(),
-                type.getText().toString(),
-                address.getText().toString(),
-                landmark.getText().toString(),
-                area.getText().toString(),
-                city.getText().toString(),
-                pincode.getText().toString(),
-                country.getText().toString(),
-                System.currentTimeMillis(),
-                System.currentTimeMillis()
-        );
-        RealmController.with(this).updateUserDetails(details);
-        Toast.makeText(this, "Address added against your profile.", Toast.LENGTH_SHORT).show();
-        finish();
+        if(addressType.equals("New")) {
+            UserDetails details = new UserDetails(
+                    UUID.randomUUID().toString(),
+                    preference.getUserId(),
+                    type.getText().toString(),
+                    address.getText().toString(),
+                    landmark.getText().toString(),
+                    area.getText().toString(),
+                    city.getText().toString(),
+                    pincode.getText().toString(),
+                    country.getText().toString(),
+                    System.currentTimeMillis(),
+                    System.currentTimeMillis()
+            );
+            RealmController.with(this).inertUserDetails(details);
+            Toast.makeText(this, "Address added against your profile.", Toast.LENGTH_SHORT).show();
+            finish();
+        }else if(addressType.equals("Update")){
+            UserDetails details = new UserDetails(
+                    null,
+                    preference.getUserId(),
+                    type.getText().toString(),
+                    address.getText().toString(),
+                    landmark.getText().toString(),
+                    area.getText().toString(),
+                    city.getText().toString(),
+                    pincode.getText().toString(),
+                    country.getText().toString(),
+                    null,
+                    System.currentTimeMillis()
+            );
+            RealmController.with(this).updateUserDetails(details, Integer.parseInt(position));
+            Toast.makeText(this, "Address updated against your profile.", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
 }

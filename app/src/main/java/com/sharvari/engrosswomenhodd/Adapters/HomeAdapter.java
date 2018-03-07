@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -44,11 +45,14 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        final home h = homeArrayList.get(position);
         Glide.with(context).load(R.drawable.img_bg).apply(RequestOptions.circleCropTransform()).into(holder.picture);
         holder.info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(context, ProfileActivity.class);
+                i.putExtra("UserId",h.getId());
+                i.putExtra("Location",h.getLocation());
                 context.startActivity(i);
             }
         });
@@ -59,6 +63,22 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
                 context.startActivity(i);
             }
         });
+
+        if(h.getPicture().equals("1")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_teenager));
+        }else if(h.getPicture().equals("2")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
+        }else if(h.getPicture().equals("3")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
+        }
+
+        holder.name.setText(h.getName());
+        holder.leftDays.setText(h.getLeftDays());
+        holder.request.setText(h.getRequest());
+        holder.description.setText(h.getDescription());
+        holder.amount.setText(h.getAmount());
+        holder.location.setText(h.getLocation());
+        holder.title.setText(h.getTitle());
     }
 
     @Override
@@ -68,11 +88,20 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView info, more, picture;
+        TextView name, leftDays, request, title, description, amount,location;
         public MyViewHolder(View itemView) {
             super(itemView);
             info = itemView.findViewById(R.id.info);
             picture = itemView.findViewById(R.id.picture);
             more = itemView.findViewById(R.id.ic_more);
+
+            name = itemView.findViewById(R.id.name);
+            leftDays = itemView.findViewById(R.id.leftDays);
+            request = itemView.findViewById(R.id.request);
+            description = itemView.findViewById(R.id.description);
+            amount = itemView.findViewById(R.id.amount);
+            location = itemView.findViewById(R.id.location);
+            title = itemView.findViewById(R.id.title);
         }
     }
 }

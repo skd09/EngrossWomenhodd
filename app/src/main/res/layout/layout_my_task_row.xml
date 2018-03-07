@@ -57,6 +57,7 @@
             android:layout_marginRight="10dp"
             android:textAllCaps="true"
             android:textStyle="bold"
+            android:id="@+id/status"
             android:textColor="@color/colorRed"
             android:layout_below="@+id/description"
             android:layout_alignParentRight="true"/>
@@ -74,6 +75,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Parel, Mumbai"
+            android:id="@+id/location"
             android:layout_marginBottom="5dp"
             android:layout_alignParentBottom="true"
             android:layout_toRightOf="@+id/icon_home"/>

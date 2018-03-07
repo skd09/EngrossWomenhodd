@@ -18,10 +18,17 @@ import android.widget.LinearLayout;
 import com.sharvari.engrosswomenhodd.Adapters.HomeAdapter;
 import com.sharvari.engrosswomenhodd.Pojos.home;
 import com.sharvari.engrosswomenhodd.R;
+import com.sharvari.engrosswomenhodd.Realm.Task;
+import com.sharvari.engrosswomenhodd.Realm.UserDetails;
+import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import io.realm.RealmResults;
 import ss.com.bannerslider.banners.Banner;
 import ss.com.bannerslider.banners.DrawableBanner;
 import ss.com.bannerslider.banners.RemoteBanner;
@@ -39,6 +46,7 @@ public class HomeFragment extends Fragment {
     private BannerSlider bannerSlider;
     private ImageView downArrow;
     private LinearLayout layout_distance;
+    private SharedPreference preference;
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
@@ -46,6 +54,7 @@ public class HomeFragment extends Fragment {
 
         recyclerView= v.findViewById(R.id.recycler_view);
         adapter = new HomeAdapter(homeArrayList, getContext());
+        preference = new SharedPreference(getContext());
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -82,33 +91,26 @@ public class HomeFragment extends Fragment {
     }
 
     private void prepareData(){
-        home h = new home();
-        homeArrayList.add(h);
 
-        h = new home();
-        homeArrayList.add(h);
+        RealmResults<Task> task = RealmController.with(this).getAllTask(preference.getUserId());
 
-        h = new home();
-        homeArrayList.add(h);
+        for(Task t : task){
+            Users users = RealmController.with(this).getCustomerDetails(t.getUserId());
+            UserDetails addressDetails = RealmController.with(this).getUserAddressDetails(t.getAddressId());
 
-        h = new home();
-        homeArrayList.add(h);
+            String date = t.getCreatedOn()!=null ? dateFormat(t.getCreatedOn()) : "";
+            String area = addressDetails!=null ? addressDetails.getArea()+", "+addressDetails.getCountry() : "";
+            int request = RealmController.with(this).getRequestCount(t.getTaskId());
 
-        h = new home();
-        homeArrayList.add(h);
-        h = new home();
-        homeArrayList.add(h);
-
-        h = new home();
-        homeArrayList.add(h);
-
-        h = new home();
-        homeArrayList.add(h);
-
-        h = new home();
-        homeArrayList.add(h);
+            home h = new home(t.getTaskId(),users.getPicture(),users.getFullName(),date,request+" Request",t.getTitle(),t.getDescription(),t.getPrice(),
+                    area);
+            homeArrayList.add(h);
+        }
 
         adapter.notifyDataSetChanged();
     }
-
+    private String dateFormat(Long date){
+        Date d = new Date(date);
+        return new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+    }
 }

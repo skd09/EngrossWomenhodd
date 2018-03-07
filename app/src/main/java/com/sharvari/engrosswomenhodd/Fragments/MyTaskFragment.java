@@ -16,8 +16,16 @@ import com.sharvari.engrosswomenhodd.Adapters.MyTaskAdapter;
 import com.sharvari.engrosswomenhodd.Pojos.Business;
 import com.sharvari.engrosswomenhodd.Pojos.MyTask;
 import com.sharvari.engrosswomenhodd.R;
+import com.sharvari.engrosswomenhodd.Realm.Task;
+import com.sharvari.engrosswomenhodd.Realm.UserDetails;
+import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.ArrayList;
+import java.util.Date;
+
+import io.realm.RealmResults;
 
 /**
  * Created by sharvari on 28-Feb-18.
@@ -28,9 +36,14 @@ public class MyTaskFragment extends Fragment {
     private MyTaskAdapter adapter;
     private RecyclerView recyclerView;
     private ArrayList<MyTask> arrayList = new ArrayList<>();
+    private SharedPreference preference;
+    private Users users;
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_my_task, container, false);
+
+        preference = new SharedPreference(getContext());
+        users = RealmController.with(this).getCustomerDetails(preference.getUserId());
 
         recyclerView = v.findViewById(R.id.recycler_view);
         adapter = new MyTaskAdapter(arrayList);
@@ -47,34 +60,21 @@ public class MyTaskFragment extends Fragment {
 
     private void prepareData() {
 
-        MyTask n = new MyTask();
-        arrayList.add(n);
+        RealmResults<Task> task = RealmController.with(this).getMyTask(preference.getUserId());
 
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
-
-        n = new MyTask();
-        arrayList.add(n);
+        for(Task t : task){
+            UserDetails d = RealmController.with(this).getUserAddressDetails(t.getAddressId());
+            String status = t.getIsComplete().equals("0") ? "PENDING" : "COMPLETE";
+            String date = t.getCreatedOn() != null ? dateFormat(t.getCreatedOn()) : "";
+            MyTask n = new MyTask(t.getTaskId(),users.getFullName(),date,t.getDescription(),"PERSONAL-"+status,d.getArea()+", "+d.getCountry(),t.getPrice());
+            arrayList.add(n);
+        }
 
         adapter.notifyDataSetChanged();
     }
 
+    private String dateFormat(Long date){
+        Date d = new Date(date);
+        return new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+    }
 }

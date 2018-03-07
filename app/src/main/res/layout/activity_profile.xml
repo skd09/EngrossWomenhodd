@@ -45,6 +45,7 @@
                 android:text="Sharvari Divekar"
                 android:textColor="@color/colorPrimary"
                 android:textAlignment="center"
+                android:id="@+id/name"
                 android:textSize="18dp"
                 android:layout_marginTop="70dp"/>
             <TextView
@@ -54,6 +55,7 @@
                 android:textAlignment="center"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
+                android:id="@+id/about"
                 android:paddingTop="5dp"
                 android:textSize="14dp"/>
             <RelativeLayout
@@ -89,6 +91,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="30"
+                        android:id="@+id/taskDone"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimary" />
                     <TextView
@@ -112,6 +115,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="30"
+                        android:id="@+id/followers"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimary" />
                     <TextView
@@ -135,6 +139,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="30"
+                        android:id="@+id/following"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimary" />
                     <TextView
