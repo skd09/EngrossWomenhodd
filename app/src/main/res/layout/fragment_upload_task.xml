@@ -90,6 +90,7 @@
                    android:padding="10dp"
                    android:inputType="text"
                    android:id="@+id/date"
+                   android:focusable="false"
                    android:layout_marginTop="10dp"
                    android:background="@color/colorWhite"
                    android:hint="Expected date of completion"/>

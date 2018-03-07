@@ -1,15 +1,20 @@
 package com.sharvari.engrosswomenhodd.Adapters;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.sharvari.engrosswomenhodd.Pojos.Request;
 import com.sharvari.engrosswomenhodd.R;
+import com.sharvari.engrosswomenhodd.Utils.Generic;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by sharvaridivekar on 02/03/18.
@@ -18,9 +23,11 @@ import java.util.ArrayList;
 public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.MyViewHolder>{
 
     private ArrayList<Request> arrayList = new ArrayList<>();
+    private Context context;
 
-    public RequestAdapter(ArrayList<Request> arrayList) {
+    public RequestAdapter(ArrayList<Request> arrayList, Context context) {
         this.arrayList = arrayList;
+        this.context = context;
     }
 
     @NonNull
@@ -33,7 +40,26 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.MyViewHo
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        Request request = arrayList.get(position);
 
+        holder.name.setText(request.getName());
+        String s = request.getStatus().equals("0") ? "PENDING" : "ACCEPTED";
+        holder.status.setText(s);
+        if(s.equals("ACCEPTED"))
+            holder.status.setTextColor(context.getResources().getColor(R.color.colorGreen));
+        Date d = new Date(request.getDate());
+        String date = new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+        holder.date.setText(date);
+        holder.amount.setText(request.getPrice());
+        holder.description.setText(request.getDescription());
+
+        if(request.getPicture().equals("1")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_teenager));
+        }else if(request.getPicture().equals("2")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
+        }else if(request.getPicture().equals("3")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
+        }
     }
 
     @Override
@@ -42,8 +68,16 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.MyViewHo
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView date,name, status, amount, description;
+        ImageView picture;
         public MyViewHolder(View itemView) {
             super(itemView);
+            date = itemView.findViewById(R.id.date);
+            name = itemView.findViewById(R.id.name);
+            status = itemView.findViewById(R.id.status);
+            amount = itemView.findViewById(R.id.amount);
+            description = itemView.findViewById(R.id.description);
+            picture = itemView.findViewById(R.id.picture);
         }
     }
 }

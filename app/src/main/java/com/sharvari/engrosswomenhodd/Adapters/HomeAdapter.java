@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -28,7 +29,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
 
     private ArrayList<home> homeArrayList = new ArrayList<>();
     private Context context;
-
+    private home h;
+    private SetOnInfoClick setOnInfoClick;
 
     public HomeAdapter(ArrayList<home> homeArrayList, Context context) {
         this.homeArrayList = homeArrayList;
@@ -44,33 +46,29 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        final home h = homeArrayList.get(position);
-        Glide.with(context).load(R.drawable.img_bg).apply(RequestOptions.circleCropTransform()).into(holder.picture);
+    public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
+        h = homeArrayList.get(position);
         holder.info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                home home = homeArrayList.get(position);
                 Intent i = new Intent(context, ProfileActivity.class);
-                i.putExtra("UserId",h.getId());
-                i.putExtra("Location",h.getLocation());
+                i.putExtra("UserId",home.getUserId());
+                i.putExtra("Location",home.getLocation());
                 context.startActivity(i);
             }
         });
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                home home = homeArrayList.get(position);
                 Intent i = new Intent(context, TaskActivity.class);
+                i.putExtra("UserId",home.getUserId());
+                i.putExtra("TaskId",home.getId());
+                i.putExtra("Location",home.getLocation());
                 context.startActivity(i);
             }
         });
-
-        if(h.getPicture().equals("1")){
-            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_teenager));
-        }else if(h.getPicture().equals("2")){
-            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
-        }else if(h.getPicture().equals("3")){
-            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
-        }
 
         holder.name.setText(h.getName());
         holder.leftDays.setText(h.getLeftDays());
@@ -79,6 +77,14 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
         holder.amount.setText(h.getAmount());
         holder.location.setText(h.getLocation());
         holder.title.setText(h.getTitle());
+
+        if(h.getPicture().equals("1")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_teenager));
+        }else if(h.getPicture().equals("2")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_women));
+        }else if(h.getPicture().equals("3")){
+            holder.picture.setImageDrawable(context.getResources().getDrawable(R.drawable.img_old));
+        }
     }
 
     @Override
@@ -103,5 +109,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
             location = itemView.findViewById(R.id.location);
             title = itemView.findViewById(R.id.title);
         }
+    }
+
+    public interface SetOnInfoClick{
+        public void onInfoClick(View v, int position);
+    }
+
+    public void OnInfoClickListener(SetOnInfoClick setOnInfoClick){
+        this.setOnInfoClick = setOnInfoClick;
     }
 }

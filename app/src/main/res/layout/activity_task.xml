@@ -62,6 +62,7 @@
                 android:textSize="14dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="5dp"
+                android:id="@+id/title"
                 android:layout_below="@+id/leftDays"
                 android:layout_toRightOf="@+id/picture"/>
 
@@ -96,6 +97,7 @@
                 android:layout_height="wrap_content"
                 android:text="Parel, Mumbai"
                 android:layout_marginTop="5dp"
+                android:id="@+id/location"
                 android:layout_below="@+id/description"
                 android:layout_toRightOf="@+id/icon_home"/>
 

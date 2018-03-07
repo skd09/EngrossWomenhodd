@@ -98,8 +98,8 @@ public class ProfileFragment extends Fragment{
         }
 
         followers.setText(RealmController.with(this).getProfileData(preference.getUserId(),"followers"));
-        following.setText(RealmController.with(this).getProfileData(preference.getUserId(),"totalTask"));
-        totalTask.setText(RealmController.with(this).getProfileData(preference.getUserId(),"following"));
+        totalTask.setText(RealmController.with(this).getProfileData(preference.getUserId(),"totalTask"));
+        following.setText(RealmController.with(this).getProfileData(preference.getUserId(),"following"));
     }
 
     public void openActivity(String page){

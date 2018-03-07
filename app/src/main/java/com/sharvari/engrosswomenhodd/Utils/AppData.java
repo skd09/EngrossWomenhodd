@@ -35,7 +35,7 @@ public class AppData {
         UserType type = new UserType(UUID.randomUUID().toString(),"Personal",System.currentTimeMillis());
         userTypes.add(type);
 
-        type = new UserType(UUID.randomUUID().toString(),"Business",System.currentTimeMillis());
+        type = new UserType(UUID.randomUUID().toString(),"Entrepreneur",System.currentTimeMillis());
         userTypes.add(type);
 
         type = new UserType(UUID.randomUUID().toString(),"Both",System.currentTimeMillis());

@@ -6,9 +6,10 @@ package com.sharvari.engrosswomenhodd.Pojos;
 
 public class MyTask {
 
-    String id, name, date, description,status, location, amount;
+    String id, name, date, description,status, location, amount, requestCount;
 
-    public MyTask(String id, String name, String date, String description, String status, String location, String amount) {
+    public MyTask(String id, String name, String date, String description, String status,
+                  String location, String amount, String requestCount) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -16,6 +17,15 @@ public class MyTask {
         this.status = status;
         this.location = location;
         this.amount = amount;
+        this.requestCount = requestCount;
+    }
+
+    public String getRequestCount() {
+        return requestCount;
+    }
+
+    public void setRequestCount(String requestCount) {
+        this.requestCount = requestCount;
     }
 
     public String getId() {

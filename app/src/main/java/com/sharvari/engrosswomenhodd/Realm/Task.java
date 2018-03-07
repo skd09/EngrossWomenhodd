@@ -14,6 +14,7 @@ public class Task extends RealmObject {
     String Description;
     String AddressId;
     String Price;
+    String CategoryId;
     String IsComplete;
     Long Date;
     Long CreatedOn;
@@ -22,18 +23,27 @@ public class Task extends RealmObject {
     public Task() {
     }
 
-    public Task(String taskId, String userId, String title, String description,
-                String addressId, String price, String isComplete, Long date, Long createdOn, Long updatedOn) {
+
+    public Task(String taskId, String userId, String title, String description, String addressId, String price, String categoryId, String isComplete, Long date, Long createdOn, Long updatedOn) {
         TaskId = taskId;
         UserId = userId;
         Title = title;
         Description = description;
         AddressId = addressId;
         Price = price;
+        CategoryId = categoryId;
         IsComplete = isComplete;
         Date = date;
         CreatedOn = createdOn;
         UpdatedOn = updatedOn;
+    }
+
+    public String getCategoryId() {
+        return CategoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        CategoryId = categoryId;
     }
 
     public String getTaskId() {

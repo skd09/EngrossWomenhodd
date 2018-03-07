@@ -5,10 +5,9 @@ package com.sharvari.engrosswomenhodd.Pojos;
  */
 
 public class home {
-    String id, picture, name, leftDays, request, title, description, amount, location;
+    String id, picture, name, leftDays, request, title, description, amount, location, userId;
 
-
-    public home(String id, String picture, String name, String leftDays, String request, String title, String description, String amount, String location) {
+    public home(String id, String picture, String name, String leftDays, String request, String title, String description, String amount, String location, String userId) {
         this.id = id;
         this.picture = picture;
         this.name = name;
@@ -18,6 +17,15 @@ public class home {
         this.description = description;
         this.amount = amount;
         this.location = location;
+        this.userId = userId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getId() {

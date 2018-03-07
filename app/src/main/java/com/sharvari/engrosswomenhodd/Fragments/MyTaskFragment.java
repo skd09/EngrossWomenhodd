@@ -1,8 +1,10 @@
 package com.sharvari.engrosswomenhodd.Fragments;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +21,7 @@ import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.Task;
 import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Utils.Generic;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
@@ -39,6 +42,7 @@ public class MyTaskFragment extends Fragment {
     private SharedPreference preference;
     private Users users;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_my_task, container, false);
 
@@ -46,7 +50,7 @@ public class MyTaskFragment extends Fragment {
         users = RealmController.with(this).getCustomerDetails(preference.getUserId());
 
         recyclerView = v.findViewById(R.id.recycler_view);
-        adapter = new MyTaskAdapter(arrayList);
+        adapter = new MyTaskAdapter(arrayList, getContext());
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -58,6 +62,7 @@ public class MyTaskFragment extends Fragment {
         return v;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void prepareData() {
 
         RealmResults<Task> task = RealmController.with(this).getMyTask(preference.getUserId());
@@ -65,8 +70,12 @@ public class MyTaskFragment extends Fragment {
         for(Task t : task){
             UserDetails d = RealmController.with(this).getUserAddressDetails(t.getAddressId());
             String status = t.getIsComplete().equals("0") ? "PENDING" : "COMPLETE";
-            String date = t.getCreatedOn() != null ? dateFormat(t.getCreatedOn()) : "";
-            MyTask n = new MyTask(t.getTaskId(),users.getFullName(),date,t.getDescription(),"PERSONAL-"+status,d.getArea()+", "+d.getCountry(),t.getPrice());
+            String date = t.getDate()!=null ? Generic.with(this).getDaysLeft(System.currentTimeMillis(),t.getDate()) : "";
+            int request = RealmController.with(this).getRequestCount(t.getTaskId());
+
+            MyTask n = new MyTask(t.getTaskId(),users.getFullName(),date,t.getDescription(),
+                    "PERSONAL-"+status,d.getArea()+", "+d.getCountry(),t.getPrice(),
+                    request+" Requests");
             arrayList.add(n);
         }
 

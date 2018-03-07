@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by sharvaridivekar on 04/03/18.
@@ -105,11 +106,11 @@ public class RealmController {
     }
 
     public RealmResults<NewsFeed> getUploadNews(){
-        return realm.where(NewsFeed.class).findAll();
+        return realm.where(NewsFeed.class).findAll().sort("CreatedOn", Sort.DESCENDING);
     }
 
     public RealmResults<Category> getCategory(){
-        return realm.where(Category.class).findAll();
+        return realm.where(Category.class).findAll().sort("CreatedOn", Sort.DESCENDING);
     }
 
     public RealmResults<UserDetails> getUserAddress(String userId){
@@ -122,7 +123,7 @@ public class RealmController {
 
     public ArrayList<SeeFeedback> getFeedbackList(){
         ArrayList<SeeFeedback> seeFeedbacks = new ArrayList<>();
-        RealmResults<Feedback> feedbackRealmResults = realm.where(Feedback.class).findAll();
+        RealmResults<Feedback> feedbackRealmResults = realm.where(Feedback.class).findAll().sort("CreatedOn", Sort.DESCENDING);
 
         for(Feedback f : feedbackRealmResults){
             Users u = realm.where(Users.class).equalTo("UserId",f.getUserId()).findFirst();
@@ -137,10 +138,10 @@ public class RealmController {
         String data = "";
         if(type.equals("followers")){
             data = realm.where(Follow.class).equalTo("FollowerId",userId)
-                    .and().equalTo("isActive","1").findAll().size() +"";
+                    .and().equalTo("isActive","0").findAll().size() +"";
         }else if(type.equals("following")){
             data = realm.where(Follow.class).equalTo("FollowingId",userId)
-                    .and().equalTo("isActive","1").findAll().size() +"";
+                    .and().equalTo("isActive","0").findAll().size() +"";
         }else if(type.equals("totalTask")){
             data = realm.where(TaskRequest.class).equalTo("UserId",userId)
                     .and().equalTo("IsAccepted","1").findAll().size()+"";
@@ -205,24 +206,75 @@ public class RealmController {
         realm.commitTransaction();
     }
 
+    public int insertFollow(Follow follow){
+        Follow t = realm.where(Follow.class).equalTo("FollowingId",follow.getFollowingId())
+                .and().equalTo("FollowerId",follow.getFollowerId()).findFirst();
+        if(t==null) {
+            realm.beginTransaction();
+            realm.copyToRealm(follow);
+            realm.commitTransaction();
+            return 1;
+        }
+        return 0;
+    }
+
+    public  int insertTaskRequest(TaskRequest request){
+        TaskRequest t = realm.where(TaskRequest.class).equalTo("TaskId",request.getTaskId())
+                .and().equalTo("UserId",request.getUserId()).findFirst();
+        if(t==null) {
+            realm.beginTransaction();
+            realm.copyToRealm(request);
+            realm.commitTransaction();
+            return 1;
+        }
+        return 0;
+    }
+
     public RealmResults<Task> getMyTask(String userId){
-        return realm.where(Task.class).equalTo("UserId",userId).findAll();
+        return realm.where(Task.class).equalTo("UserId",userId)
+                .findAll()
+                .sort("CreatedOn", Sort.DESCENDING);
     }
 
     public RealmResults<Task> getAllTask(String myUserId){
         return realm.where(Task.class)
                 .notEqualTo("UserId",myUserId)
-                .findAll();
+                .and().greaterThanOrEqualTo("Date",System.currentTimeMillis())
+                .findAll().sort("CreatedOn", Sort.DESCENDING);
+    }
+
+    public Task getTask(String taskId){
+        return realm.where(Task.class)
+                .equalTo("TaskId",taskId).findFirst();
     }
 
     public RealmResults<TaskRequest> getRequest(String taskId){
         return realm.where(TaskRequest.class)
-                .notEqualTo("TaskId",taskId)
-                .findAll();
+                .equalTo("TaskId",taskId)
+                .findAll().sort("CreatedOn", Sort.DESCENDING);
     }
+    public int acceptRequest(String taskId, String userId){
+        TaskRequest request = realm.where(TaskRequest.class)
+                .equalTo("TaskId",taskId)
+                .and().equalTo("IsAccepted","1").findFirst();
+        if(request == null){
+            realm.beginTransaction();
+            TaskRequest acceptRequest = realm.where(TaskRequest.class)
+                    .equalTo("TaskId",taskId)
+                    .and().equalTo("UserId",userId).findFirst();
+
+            acceptRequest.setIsAccepted("1");
+            acceptRequest.setUpdatedOn(System.currentTimeMillis());
+            realm.insertOrUpdate(acceptRequest);
+            realm.commitTransaction();
+            return 1;
+        }
+        return  0;
+    }
+
     public int getRequestCount(String taskId){
         return realm.where(TaskRequest.class)
-                .notEqualTo("TaskId",taskId)
+                .equalTo("TaskId",taskId)
                 .findAll().size();
     }
 

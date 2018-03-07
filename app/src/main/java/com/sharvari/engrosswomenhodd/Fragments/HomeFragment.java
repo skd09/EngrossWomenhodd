@@ -21,6 +21,7 @@ import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.Task;
 import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Utils.Generic;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
@@ -61,23 +62,24 @@ public class HomeFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
 
-        recyclerView.setFocusable(false);
         recyclerView.setNestedScrollingEnabled(false);
         bannerSlider = v.findViewById(R.id.banner);
         layout_distance = v.findViewById(R.id.layout_distance);
+
+        prepareData();
+
         downArrow = v.findViewById(R.id.img);
         downArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(layout_distance.getVisibility() == View.VISIBLE){
-                    layout_distance.setVisibility(View.GONE);
-                }else{
-                    layout_distance.setVisibility(View.VISIBLE);
-                }
+            if(layout_distance.getVisibility() == View.VISIBLE){
+                layout_distance.setVisibility(View.GONE);
+            }else{
+                layout_distance.setVisibility(View.VISIBLE);
+            }
             }
         });
         slider();
-        prepareData();
         return v;
     }
 
@@ -98,12 +100,13 @@ public class HomeFragment extends Fragment {
             Users users = RealmController.with(this).getCustomerDetails(t.getUserId());
             UserDetails addressDetails = RealmController.with(this).getUserAddressDetails(t.getAddressId());
 
-            String date = t.getCreatedOn()!=null ? dateFormat(t.getCreatedOn()) : "";
+            String date = t.getDate()!=null ? Generic.with(this).getDaysLeft(System.currentTimeMillis(),t.getDate()) : "";
             String area = addressDetails!=null ? addressDetails.getArea()+", "+addressDetails.getCountry() : "";
             int request = RealmController.with(this).getRequestCount(t.getTaskId());
 
-            home h = new home(t.getTaskId(),users.getPicture(),users.getFullName(),date,request+" Request",t.getTitle(),t.getDescription(),t.getPrice(),
-                    area);
+            home h = new home(t.getTaskId(),users.getPicture(),users.getFullName(),date,
+                    request+" Request",t.getTitle(),t.getDescription(),t.getPrice(),
+                    area,t.getUserId());
             homeArrayList.add(h);
         }
 

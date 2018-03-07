@@ -24,6 +24,7 @@
         android:padding="10dp"
         android:hint="Your Charge"
         android:inputType="number"
+        android:id="@+id/charges"
         android:background="@color/colorLightGray"/>
 
     <EditText
@@ -33,6 +34,7 @@
         android:hint="Why to accept you?"
         android:layout_marginTop="10dp"
         android:lines="5"
+        android:id="@+id/why"
         android:background="@color/colorLightGray"/>
     <!--<Button
         android:layout_width="match_parent"
