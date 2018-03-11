@@ -20,13 +20,23 @@ import android.widget.Toast;
 
 import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Requests.UserLoginRequest;
+import com.sharvari.engrosswomenhodd.Requests.UserRegisterRequest;
+import com.sharvari.engrosswomenhodd.Response.UserLoginResponse;
+import com.sharvari.engrosswomenhodd.Response.UserRegisterResponse;
+import com.sharvari.engrosswomenhodd.Services.Apis;
 import com.sharvari.engrosswomenhodd.Utils.AppData;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.UUID;
 
 import io.realm.Realm;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvari on 09-Feb-18.
@@ -48,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button login, register;
     private LinearLayout layout;
     private String picture = "";
+    private Loader loader;
 
     private SharedPreference preference;
     @Override
@@ -56,6 +67,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         realm = Realm.getDefaultInstance();
+        loader = new Loader(this);
         preference = new SharedPreference(this);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
@@ -73,9 +85,9 @@ public class LoginActivity extends AppCompatActivity {
         name = findViewById(R.id.et_full_name);
         city = findViewById(R.id.et_city);
 
-        name.setText("Sharvari Divekar");
-        mobile.setText("9999900000");
-        password.setText("skd");
+//        name.setText("Sharvari Divekar");
+//        mobile.setText("9999900000");
+//        password.setText("skd");
 
         teen = findViewById(R.id.teen);
         mid = findViewById(R.id.mid);
@@ -147,44 +159,67 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onLoginSelect(){
-        Users user = realm.where(Users.class).equalTo("FullName",name.getText().toString().trim())
-                .and().equalTo("Mobile",mobile.getText().toString().trim())
-                .equalTo("Password",password.getText().toString().trim()).findFirst();
-        if(user!=null){
-            preference.createLoginSession(name.getText().toString().trim(),mobile.getText().toString().trim(),
-                    user.getUserId());
-            callIntent("Login");
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+        UserLoginRequest registerRequest = new UserLoginRequest(
+                name.getText().toString().trim(),
+                password.getText().toString().trim(),
+                mobile.getText().toString().trim()
+        );
+        Call<UserLoginResponse> call = client.userLogin(registerRequest);
+        call.enqueue(new Callback<UserLoginResponse>() {
+            @Override
+            public void onResponse(Call<UserLoginResponse>call, Response<UserLoginResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    preference.createLoginSession(name.getText().toString(),mobile.getText().toString(),
+                            response.body().getUserId(),"","");
+                    callIntent("Login");
+                }else{
+                    Toast.makeText(LoginActivity.this, response.body().getStatusMsg(), Toast.LENGTH_SHORT).show();
+                }
+                loader.hideLoader();
+            }
 
-        }else{
-            Snackbar.make(layout,"Your details does not match.\nEnter valid details.",Snackbar.LENGTH_LONG).show();
-        }
+            @Override
+            public void onFailure(Call<UserLoginResponse>call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
     }
 
     public void onRegisterSelect()
     {
-        String userId = UUID.randomUUID().toString();
-        RadioButton radioButton = (RadioButton) findViewById(radio.getCheckedRadioButtonId());
-        realm.beginTransaction();
-        Users users = new Users(
-                userId,
+        loader.showLoader();
+        final RadioButton radioButton = (RadioButton) findViewById(radio.getCheckedRadioButtonId());
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+        UserRegisterRequest registerRequest = new UserRegisterRequest(
                 name.getText().toString().trim(),
-                mobile.getText().toString().trim(),
                 password.getText().toString().trim(),
-                radioButton.getText().toString(),
-                "",
-                "",
-                "",
-                picture,
+                mobile.getText().toString().trim(),
                 city.getText().toString().trim(),
-                System.currentTimeMillis(),
-                System.currentTimeMillis()
+                picture,
+                radioButton.getText().toString()
         );
-        realm.copyToRealm(users);
-        realm.commitTransaction();
+        Call<UserRegisterResponse> call = client.registerUser(registerRequest);
+        call.enqueue(new Callback<UserRegisterResponse>() {
+            @Override
+            public void onResponse(Call<UserRegisterResponse>call, Response<UserRegisterResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    preference.createLoginSession(name.getText().toString().trim(),
+                            mobile.getText().toString().trim(),
+                            response.body().getUserId(),picture,radioButton.getText().toString());
+                    callIntent("Register");
+                }else{
+                    Toast.makeText(LoginActivity.this, response.body().getStatusMsg(), Toast.LENGTH_SHORT).show();
+                }
+                loader.hideLoader();
+            }
 
-
-        preference.createLoginSession(name.getText().toString().trim(),mobile.getText().toString().trim(),userId);
-        callIntent("Register");
+            @Override
+            public void onFailure(Call<UserRegisterResponse>call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
     }
 
     private void setData(){

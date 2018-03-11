@@ -19,7 +19,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Empower women with women power"
+        android:text="Empower woman with women's power"
         android:textAlignment="center"
         android:textColor="#FFF"
         android:textSize="12dp"

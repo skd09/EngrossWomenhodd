@@ -6,9 +6,9 @@ package com.sharvari.engrosswomenhodd.Pojos;
 
 public class Request {
 
-    String id,userId, name, status, date, price, description, picture;
+    String id,userId, name, status, date, price, description, picture, taskDetailsId;
 
-    public Request(String id, String userId, String name, String status, String date, String price, String description, String picture) {
+    public Request(String id, String userId, String name, String status, String date, String price, String description, String picture, String taskDetailsId) {
         this.id = id;
         this.userId = userId;
         this.name = name;
@@ -17,6 +17,15 @@ public class Request {
         this.price = price;
         this.description = description;
         this.picture = picture;
+        this.taskDetailsId = taskDetailsId;
+    }
+
+    public String getTaskDetailsId() {
+        return taskDetailsId;
+    }
+
+    public void setTaskDetailsId(String taskDetailsId) {
+        this.taskDetailsId = taskDetailsId;
     }
 
     public String getPicture() {

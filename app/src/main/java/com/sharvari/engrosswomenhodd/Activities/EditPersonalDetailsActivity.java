@@ -28,13 +28,27 @@ import com.sharvari.engrosswomenhodd.Pojos.Address;
 import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Requests.ChangePassword;
+import com.sharvari.engrosswomenhodd.Requests.GetTaskRequest;
+import com.sharvari.engrosswomenhodd.Requests.UpdateUserDetailsRequest;
+import com.sharvari.engrosswomenhodd.Response.GetAddress.GetAddressData;
+import com.sharvari.engrosswomenhodd.Response.GetAddress.GetAddressResponse;
+import com.sharvari.engrosswomenhodd.Response.UploadFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Response.UserDetails.GetUserData;
+import com.sharvari.engrosswomenhodd.Response.UserDetails.GetUserDetails;
+import com.sharvari.engrosswomenhodd.Services.Apis;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
 import com.sharvari.engrosswomenhodd.Utils.RecyclerTouchListener;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.ArrayList;
 
 import io.realm.RealmResults;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvaridivekar on 02/03/18.
@@ -57,20 +71,26 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
     private RadioGroup radioGroup;
     private RadioButton personal, business, both;
     private Button update;
-    private Users users;
+    private Loader loader;
+    private String password="";
+    private GetUserData data;
+    private String page;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_personal_details);
 
+        loader = new Loader(this);
+
         Toolbar t = findViewById(R.id.toolbar);
         setSupportActionBar(t);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        final String page = getIntent().getExtras().getString("Page");
+        page = getIntent().getExtras().getString("Page");
         preference = new SharedPreference(this);
+
 
         t.setTitle(page);
         //t.setNavigationIcon(R.drawable.ic_left_arrow_white);
@@ -116,11 +136,12 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
+                Address a = addresses.get(position);
                 Intent i = new Intent(EditPersonalDetailsActivity.this, AddressAddActivity.class);
                 i.putExtra("Type","Update");
-                i.putExtra("Position",position+"");
-                startActivity(i);
+                i.putExtra("Address", a);
                 finish();
+                startActivity(i);
             }
 
             @Override
@@ -132,22 +153,18 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if(page.equals("Edit Profile")){
-                    RadioButton radioButton = (RadioButton) findViewById(radioGroup.getCheckedRadioButtonId());
-                    RealmController.with(EditPersonalDetailsActivity.this).updateProfileData(preference.getUserId(),
-                    name.getText().toString(),
-                    mobile.getText().toString(),
-                    skills.getText().toString(),
-                    about.getText().toString(),
-                    radioButton.getText().toString());
-                    preference.createLoginSession(name.getText().toString(),mobile.getText().toString(),preference.getUserId());
+                    updatePersonalDetails();
                 }else if(page.equals("Change Password")){
                     if(oldPassword.getText().toString().isEmpty() && newPassword.getText().toString().isEmpty() && confirmPassword.getText().toString().isEmpty()){
                         Toast.makeText(EditPersonalDetailsActivity.this, "All fields are mandatory", Toast.LENGTH_SHORT).show();
                         return;
                     }else {
-                        if(oldPassword.getText().toString().equals(users.getPassword())){
+                        if(oldPassword.getText().toString().equals(password)){
                             if(newPassword.getText().toString().equals(confirmPassword.getText().toString())){
-                                RealmController.with(EditPersonalDetailsActivity.this).updateProfilePassword(preference.getUserId(),newPassword.getText().toString().trim());
+                                updatePassword();
+                                Toast.makeText(EditPersonalDetailsActivity.this, "Login with new password", Toast.LENGTH_SHORT).show();
+                                finish();
+                                preference.logoutUser();
                             }else{
                                 Toast.makeText(EditPersonalDetailsActivity.this, "Confirm Password does not match.", Toast.LENGTH_LONG).show();
                                 return;
@@ -185,12 +202,11 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
             }
         });
 
+        getUserDetails();
         selectedPage(page);
-        setAddressData();
     }
 
     private void selectedPage(String page){
-        users = RealmController.with(this).getCustomerDetails(preference.getUserId());
         if(page.equals("Edit Profile")){
             layout_address.setVisibility(View.GONE);
             layout_password.setVisibility(View.GONE);
@@ -207,17 +223,7 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
             business = findViewById(R.id.business);
             both = findViewById(R.id.both);
 
-            name.setText(users.getFullName());
-            mobile.setText(users.getMobile());
-            skills.setText(users.getKeySkills());
-            about.setText(users.getAbout());
-            if(users.getAccountType().equals("Personal")){
-                personal.setChecked(true);
-            }else if(users.getAccountType().equals("Business")){
-                business.setChecked(true);
-            }else if(users.getAccountType().equals("Both")){
-                both.setChecked(true);
-            }
+
 
         }else if(page.equals("Change Password")){
             layout_address.setVisibility(View.GONE);
@@ -237,6 +243,7 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
             Toast.makeText(this, "Swipe right to see you address.", Toast.LENGTH_LONG).show();
 
             update.setVisibility(View.GONE);
+            getAddressData();
 
         }else if(page.equals("Invite a Friend")){
             layout_address.setVisibility(View.GONE);
@@ -250,18 +257,136 @@ public class EditPersonalDetailsActivity extends AppCompatActivity{
         }
     }
 
-    private void setAddressData(){
-        RealmResults<UserDetails> details = RealmController.with(this).getUserAddress(preference.getUserId());
-        if(details.size()>0){
-            for(UserDetails detail : details){
-                Address address = new Address(detail.getAddressType(),detail.getAddress(),detail.getLandmark(),
-                        detail.getArea(),detail.getCity(),detail.getPincode(),detail.getCountry());
-                addresses.add(address);
-            }
-            adapter.notifyDataSetChanged();
-        }
+    private void getAddressData(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
 
-        textAddress.setText("You have "+addresses.size()+" addresses");
+        GetTaskRequest request = new GetTaskRequest(preference.getUserId());
+
+        Call<GetAddressResponse> call = client.getAddresses(request);
+
+        call.enqueue(new Callback<GetAddressResponse>() {
+            @Override
+            public void onResponse(Call<GetAddressResponse> call, Response<GetAddressResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    ArrayList<GetAddressData> userData = response.body().getData();
+                    if(userData.size()>0) {
+
+                        for(GetAddressData d : userData){
+                            Address address = new Address(d.getAddressType(),d.getAddress(),d.getLandmark(),
+                                    d.getArea(),d.getCity(),d.getPincode(),d.getCountry(),d.getUserId(),d.getUserDetailsId());
+                            addresses.add(address);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                    textAddress.setText("You have "+addresses.size()+" addresses");
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<GetAddressResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
     }
 
+    private void getUserDetails(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        GetTaskRequest request = new GetTaskRequest(preference.getUserId());
+
+        Call<GetUserDetails> call = client.getUserDetails(request);
+
+        call.enqueue(new Callback<GetUserDetails>() {
+            @Override
+            public void onResponse(Call<GetUserDetails> call, Response<GetUserDetails> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    ArrayList<GetUserData> userData = response.body().getData();
+                    if(userData.size()>0) {
+                        password = userData.get(0).getPassword().toString();
+                        data = userData.get(0);
+                        if(page.equals("Edit Profile")){
+                            setData();
+                        }
+                    }
+                }
+
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<GetUserDetails> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+
+    private void setData(){
+        name.setText(data.getFullName().toString());
+        mobile.setText(data.getMobile().toString());
+        skills.setText(data.getKeySkills().toString());
+        about.setText(data.getAbout().toString());
+        if(data.getAccountType().equals("Personal")){
+            personal.setChecked(true);
+        }else if(data.getAccountType().equals("Business")){
+            business.setChecked(true);
+        }else if(data.getAccountType().equals("Both")){
+            both.setChecked(true);
+        }
+    }
+
+    private void updatePersonalDetails(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+        RadioButton radioButton = (RadioButton) findViewById(radioGroup.getCheckedRadioButtonId());
+        UpdateUserDetailsRequest request = new UpdateUserDetailsRequest(
+                preference.getUserId(),
+                radioButton.getText().toString(),
+                skills.getText().toString(),
+                about.getText().toString());
+
+
+        Call<UploadFeedbackResponse> call = client.updateUserDetails(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+
+    private void updatePassword(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+        ChangePassword request = new ChangePassword(
+                preference.getUserId(),
+                confirmPassword.getText().toString());
+
+
+        Call<UploadFeedbackResponse> call = client.changePassword(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
 }

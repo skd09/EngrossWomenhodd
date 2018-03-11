@@ -42,7 +42,7 @@ public class MyTaskRequestAdapter extends RecyclerView.Adapter<MyTaskRequestAdap
         Request request = arrayList.get(position);
 
         holder.name.setText(request.getName());
-        String s = request.getStatus().equals("0") ? "PENDING" : "ACCEPTED";
+        String s = request.getStatus();
         holder.status.setText(s);
         if(s.equals("ACCEPTED"))
             holder.status.setTextColor(context.getResources().getColor(R.color.colorGreen));

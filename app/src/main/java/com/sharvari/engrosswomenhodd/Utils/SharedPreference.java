@@ -32,6 +32,10 @@ public class SharedPreference {
 
     public static final String KEY_USER_ID = "userId";
 
+    public static final String KEY_USER_IMG = "img";
+
+    public static final String KEY_USER_Type = "userType";
+
 
     public SharedPreference(Context context){
         this._context = context;
@@ -39,7 +43,7 @@ public class SharedPreference {
         editor = pref.edit();
     }
 
-    public void createLoginSession(String name, String mobile, String userId){
+    public void createLoginSession(String name, String mobile, String userId,String img, String type){
         editor.putString(IS_LOGIN, "1");
 
         editor.putString(KEY_NAME, name);
@@ -47,6 +51,10 @@ public class SharedPreference {
         editor.putString(KEY_MOBILE, mobile);
 
         editor.putString(KEY_USER_ID, userId);
+
+        editor.putString(KEY_USER_IMG, img);
+
+        editor.putString(KEY_USER_Type, type);
 
         editor.commit();
     }
@@ -75,15 +83,20 @@ public class SharedPreference {
     }
 
     public String getUserName(){
-        return pref.getString(KEY_NAME, null);
+        return pref.getString(KEY_NAME, "");
     }
 
     public String getUserMobile(){
-        return pref.getString(KEY_MOBILE, null);
+        return pref.getString(KEY_MOBILE, "");
+    }
+
+    public String getUserImage(){
+        return pref.getString(KEY_USER_IMG, "");
     }
     public String getUserId(){
-        return pref.getString(KEY_USER_ID, null);
+        return pref.getString(KEY_USER_ID, "");
     }
-
-
+    public String getUserType(){
+        return pref.getString(KEY_USER_Type, "");
+    }
 }

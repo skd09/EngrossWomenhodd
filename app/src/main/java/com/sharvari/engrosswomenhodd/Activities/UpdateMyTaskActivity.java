@@ -3,6 +3,7 @@ package com.sharvari.engrosswomenhodd.Activities;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -13,21 +14,39 @@ import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sharvari.engrosswomenhodd.Fragments.UploadTaskFragment;
+import com.sharvari.engrosswomenhodd.Pojos.MyTask;
 import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.Category;
 import com.sharvari.engrosswomenhodd.Realm.Task;
 import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Requests.GetTaskRequest;
+import com.sharvari.engrosswomenhodd.Requests.UpdateMyTaskRequest;
+import com.sharvari.engrosswomenhodd.Requests.UploadUserTaskRequest;
+import com.sharvari.engrosswomenhodd.Response.Category.GetCategoryData;
+import com.sharvari.engrosswomenhodd.Response.Category.GetCategoryResponse;
+import com.sharvari.engrosswomenhodd.Response.GetAddress.GetAddressData;
+import com.sharvari.engrosswomenhodd.Response.GetAddress.GetAddressResponse;
+import com.sharvari.engrosswomenhodd.Response.UploadFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Response.UserDetails.GetUserData;
+import com.sharvari.engrosswomenhodd.Services.Apis;
 import com.sharvari.engrosswomenhodd.Utils.Generic;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import io.realm.RealmResults;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvaridivekar on 08/03/18.
@@ -40,19 +59,29 @@ public class UpdateMyTaskActivity extends AppCompatActivity implements DatePicke
     private EditText title, description, url, pay, date, other, completed;
     private TextView c;
     private String taskType = "Personal";
-    private RealmResults<UserDetails> userAddress;
-    private RealmResults<Category> categories;
-    private Users details;
+    private MyTask task;
     private RatingBar ratingBar;
     private Calendar myCalendar = Calendar.getInstance();
-    private String taskId;
+    private ArrayList<String> array = new ArrayList<>();
+    private ArrayList<String> locationArray = new ArrayList<>();
+    private ArrayList<String> categoryArray = new ArrayList<>();
+    private Loader loader;
+
+    private ArrayList<GetCategoryData> categoryData;
+    private ArrayList<GetAddressData> userData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_my_task);
 
-        taskId = getIntent().getExtras().getString("TaskId");
+        loader = new Loader(this);
+
+        Bundle data = getIntent().getExtras();
+        task = (MyTask) data.getParcelable("Task");
+        preference= new SharedPreference(this);
+        getLocation();
+        getCategory();
 
         typeSpinner = findViewById(R.id.typeSpinner);
         locationSpinner = findViewById(R.id.locationSpinner);
@@ -78,23 +107,6 @@ public class UpdateMyTaskActivity extends AppCompatActivity implements DatePicke
             }
         });
 
-        preference= new SharedPreference(this);
-
-        details = RealmController.with(this).getCustomerDetails(preference.getUserId());
-        userAddress = RealmController.with(this).getUserAddress(preference.getUserId());
-        categories = RealmController.with(this).getCategory();
-
-        final ArrayList<String> array = new ArrayList<>();
-        ArrayList<String> locationArray = new ArrayList<>();
-        ArrayList<String> categoryArray = new ArrayList<>();
-
-        for(UserDetails d : userAddress){
-            locationArray.add(d.getAddressType());
-        }
-
-        for(Category d : categories){
-            categoryArray.add(d.getName());
-        }
 
         array.add("Personal");
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -123,10 +135,14 @@ public class UpdateMyTaskActivity extends AppCompatActivity implements DatePicke
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                if(categories.get(position).getName().equals("Others")) {
-                    other.setVisibility(View.VISIBLE);
-                }else {
-                    other.setVisibility(View.GONE);
+                if(categoryData!=null) {
+                    if (categoryData.get(position).getName().equals("Others")) {
+                        if (categoryData != null) {
+                            other.setVisibility(View.VISIBLE);
+                        } else {
+                            other.setVisibility(View.GONE);
+                        }
+                    }
                 }
             }
 
@@ -145,18 +161,125 @@ public class UpdateMyTaskActivity extends AppCompatActivity implements DatePicke
         setData();
     }
 
+
+
+    private void getLocation(){
+        locationArray.add("Select");
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        GetTaskRequest request = new GetTaskRequest(preference.getUserId());
+
+        Call<GetAddressResponse> call = client.getAddresses(request);
+
+        call.enqueue(new Callback<GetAddressResponse>() {
+            @Override
+            public void onResponse(Call<GetAddressResponse> call, Response<GetAddressResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    userData = response.body().getData();
+                    if(userData.size()>0) {
+
+                        for(GetAddressData d : userData){
+                            locationArray.add(d.getAddressType());
+                        }
+
+                    }
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<GetAddressResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+
+    private void getCategory(){
+        categoryArray.add("Select");
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        Call<GetCategoryResponse> call = client.getCategory();
+
+        call.enqueue(new Callback<GetCategoryResponse>() {
+            @Override
+            public void onResponse(Call<GetCategoryResponse> call, Response<GetCategoryResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    categoryData = response.body().getData();
+                    if(categoryData.size()>0) {
+
+                        for(GetCategoryData d : categoryData){
+                            categoryArray.add(d.getName());
+                        }
+
+                    }
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<GetCategoryResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+
     public void setData(){
-        Task task = RealmController.with(this).getTask(taskId);
-        title.setText(task.getTitle());
         description.setText(task.getDescription());
-        pay.setText(task.getPrice());
+        pay.setText(task.getAmount());
         title.setText(task.getTitle());
-        date.setText(Generic.with(this).dateFormat(task.getDate()));
-        completed.setText(task.getIsComplete().equals("0") ? "No" : "Yes");
+        date.setText(task.getDate());
+        completed.setText(task.getStatus().equals("PENDING") ? "No" : "Yes");
+        int pos = 0;
+        if(locationArray.size()>1){
+            for(GetAddressData data : userData){
+                pos++;
+                if(data.getUserDetailsId() == task.getAddressId()) {
+                    locationSpinner.setSelection(pos);
+                    break;
+                }
+            }
+
+        }
     }
 
     public void onPersonalUploadClick(){
+        String[] dFormat = date.getText().toString().split("/");
+        Date d = new Date(dFormat[1]+"/"+dFormat[0]+"/"+dFormat[2]);
 
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        UpdateMyTaskRequest request = new UpdateMyTaskRequest(
+                task.getId(),
+                userData.get(locationSpinner.getSelectedItemPosition()-1).getUserDetailsId(),
+                title.getText().toString(),
+                description.getText().toString(),
+                pay.getText().toString(),
+                d.toString(),
+                categoryData.get(categorySpinner.getSelectedItemPosition()-1).getCategoryId(),
+                completed.getText().toString().toLowerCase().equals("no") ? "F":"T",
+                ratingBar.getRating()+""
+        );
+
+        Call<UploadFeedbackResponse> call = client.updateMyTaskRequest(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                loader.hideLoader();
+                if(response.body().getStatusCode().equals("0")){
+                   finish();
+                    Toast.makeText(UpdateMyTaskActivity.this, "Updated youra task details.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
     }
 
     @Override

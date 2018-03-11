@@ -20,19 +20,29 @@ import android.widget.Toast;
 
 import com.sharvari.engrosswomenhodd.Adapters.RequestAdapter;
 import com.sharvari.engrosswomenhodd.Pojos.Request;
+import com.sharvari.engrosswomenhodd.Pojos.home;
 import com.sharvari.engrosswomenhodd.R;
-import com.sharvari.engrosswomenhodd.Realm.Task;
 import com.sharvari.engrosswomenhodd.Realm.TaskRequest;
-import com.sharvari.engrosswomenhodd.Realm.UserDetails;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Requests.GetTaskHelpRequest;
+import com.sharvari.engrosswomenhodd.Requests.InsertTaskHelpRequest;
+import com.sharvari.engrosswomenhodd.Response.TaskRequest.TaskRequestData;
+import com.sharvari.engrosswomenhodd.Response.TaskRequest.TaskRequestResponse;
+import com.sharvari.engrosswomenhodd.Response.UploadFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Services.Apis;
 import com.sharvari.engrosswomenhodd.Utils.Generic;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
-import com.sharvari.engrosswomenhodd.Utils.RecyclerTouchListener;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
+import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 import io.realm.RealmResults;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvaridivekar on 02/03/18.
@@ -47,23 +57,32 @@ public class TaskActivity extends AppCompatActivity{
     private ArrayList<Request> requests = new ArrayList<>();
     private String userId,taskId;
     private String userLocation;
+    private home user;
+    public Loader loader;
+    public SharedPreference preference;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
+        loader= new  Loader(this);
+        preference= new  SharedPreference(this);
         Toolbar t = findViewById(R.id.toolbar);
         setSupportActionBar(t);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        Bundle data = getIntent().getExtras();
+        user = (home) data.getParcelable("home");
+
+
         t.setTitle("Request");
         //t.setNavigationIcon(R.drawable.ic_left_arrow_white);
 
-        userId = getIntent().getExtras().getString("UserId");
-        taskId = getIntent().getExtras().getString("TaskId");
-        userLocation = getIntent().getExtras().getString("Location");
+        userId = user.getUserId();
+        taskId = user.getId();
+        userLocation = user.getLocation();
 
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,53 +120,67 @@ public class TaskActivity extends AppCompatActivity{
     }
 
     private void setData(){
-        Task task = RealmController.with(this).getTask(taskId);
-        Users users = RealmController.with(this).getCustomerDetails(userId);
-        UserDetails addressDetails = RealmController.with(this).getUserAddressDetails(task.getAddressId());
 
-        String date = task.getDate()!=null ? Generic.with(this).getDaysLeft(System.currentTimeMillis(),task.getDate()) : "";
-        String area = addressDetails!=null ? addressDetails.getArea()+", "+addressDetails.getCountry() : "";
-        int request = RealmController.with(this).getRequestCount(task.getTaskId());
-
-
-        name.setText(users.getFullName());
-        leftDays.setText(date);
-        requestCount.setText(request+" Request");
-        description.setText(task.getDescription());
-        amount.setText(task.getPrice());
-        location.setText(area);
-        title.setText(task.getTitle());
-        if(users.getPicture().equals("1")){
+        name.setText(user.getName());
+        leftDays.setText(user.getLeftDays());
+        requestCount.setText(user.getRequest());
+        description.setText(user.getDescription());
+        amount.setText(user.getAmount());
+        location.setText(user.getLocation());
+        title.setText(user.getTitle());
+        if(user.getPicture().equals("1")){
             picture.setImageDrawable(this.getResources().getDrawable(R.drawable.img_teenager));
-        }else if(users.getPicture().equals("2")){
+        }else if(user.getPicture().equals("2")){
             picture.setImageDrawable(this.getResources().getDrawable(R.drawable.img_women));
-        }else if(users.getPicture().equals("3")){
+        }else if(user.getPicture().equals("3")){
             picture.setImageDrawable(this.getResources().getDrawable(R.drawable.img_old));
         }
     }
 
     private void prepareData(){
+        requests.clear();
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
 
-        RealmResults<TaskRequest> r = RealmController.with(this).getRequest(taskId);
+        GetTaskHelpRequest request = new GetTaskHelpRequest(user.getId());
 
-        for(TaskRequest t : r){
-            Users users = RealmController.with(this).getCustomerDetails(t.getUserId());
-            Request request = new Request(
-                    t.getTaskId(),
-                    t.getUserId(),
-                    users.getFullName(),
-                    t.getIsAccepted(),
-                    Generic.with(this).dateFormat(t.getCreatedOn()),
-                    t.getPrice(),
-                    t.getComments(),
-                    users.getPicture()
+        Call<TaskRequestResponse> call = client.getTaskRequest(request);
 
-            );
-            requests.add(request);
+        call.enqueue(new Callback<TaskRequestResponse>() {
+            @Override
+            public void onResponse(Call<TaskRequestResponse> call, Response<TaskRequestResponse> response) {
+                if(response.body().getStatusCode().equals("0")) {
+                    loader.hideLoader();
+                    if (response.body().getTaskList().size() > 0) {
+                        ArrayList<TaskRequestData> data = response.body().getTaskList();
 
-        }
+                        for (TaskRequestData t : data) {
+                            Request request = new Request(
+                                    t.getTaskId(),
+                                    t.getUserId(),
+                                    t.getFullName(),
+                                    t.getIsAccepted().equals("F") ? "PENDING" : "ACCEPTED",
+                                    dateFormat(t.getCreatedOn()),
+                                    t.getPrice(),
+                                    t.getComments(),
+                                    t.getPicture(),
+                                    t.getTaskRequestId()
 
-        adapter.notifyDataSetChanged();
+                            );
+                            requests.add(request);
+                        }
+                        adapter.notifyDataSetChanged();
+
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TaskRequestResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+
     }
 
     public void showChangeLangDialog() {
@@ -162,29 +195,7 @@ public class TaskActivity extends AppCompatActivity{
         dialogBuilder.setTitle("Want to request?");
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                TaskRequest request = new TaskRequest(
-                        UUID.randomUUID().toString(),
-                        taskId,
-                        userId,
-                        charges.getText().toString(),
-                        why.getText().toString(),
-                        "0",
-                        "0",
-                        System.currentTimeMillis(),
-                        System.currentTimeMillis()
-                );
-                int code = RealmController.with(TaskActivity.this).insertTaskRequest(request);
-                if(code == 1) {
-                    Toast.makeText(TaskActivity.this, "Your request is sent.", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(TaskActivity.this, "Your request already exist.", Toast.LENGTH_SHORT).show();
-                }
-                Intent i = new Intent(TaskActivity.this, TaskActivity.class);
-                i.putExtra("UserId",userId);
-                i.putExtra("TaskId",taskId);
-                i.putExtra("Location",userLocation);
-                startActivity(i);
-                finish();
+                sendRequest(charges.getText().toString(),why.getText().toString());
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -196,4 +207,43 @@ public class TaskActivity extends AppCompatActivity{
         b.show();
     }
 
+    private void sendRequest(String price, String comments){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        InsertTaskHelpRequest request = new InsertTaskHelpRequest(
+                user.getId(),
+                preference.getUserId(),
+                price,
+                comments
+
+        );
+
+        Call<UploadFeedbackResponse> call = client.insertTaskHelpRequest(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    prepareData();
+                    Toast.makeText(TaskActivity.this, "Request succesfully sent.", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(TaskActivity.this, response.body().getStatusMsg(), Toast.LENGTH_SHORT).show();
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+    private String dateFormat(String dateStr){
+
+        String[] format = dateStr.split(" ")[0].split("-");
+
+        String formatedDate = format[2] + "/" + format[1] + "/" + format[0];
+        return formatedDate;
+    }
 }

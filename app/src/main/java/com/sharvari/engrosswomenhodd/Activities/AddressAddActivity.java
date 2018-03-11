@@ -10,14 +10,29 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.sharvari.engrosswomenhodd.Pojos.Address;
+import com.sharvari.engrosswomenhodd.Pojos.home;
 import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.UserDetails;
+import com.sharvari.engrosswomenhodd.Requests.GetTaskRequest;
+import com.sharvari.engrosswomenhodd.Requests.InsertAddressRequest;
+import com.sharvari.engrosswomenhodd.Requests.UpdateAddressRequest;
+import com.sharvari.engrosswomenhodd.Response.GetAddress.GetAddressData;
+import com.sharvari.engrosswomenhodd.Response.GetAddress.GetAddressResponse;
+import com.sharvari.engrosswomenhodd.Response.UploadFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Services.Apis;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import io.realm.RealmResults;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvari on 05-Mar-18.
@@ -29,7 +44,8 @@ public class AddressAddActivity extends AppCompatActivity{
     private RelativeLayout layout;
     private SharedPreference preference;
     private String addressType;
-    private String position;
+    private Address a;
+    private Loader loader;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,6 +53,7 @@ public class AddressAddActivity extends AppCompatActivity{
         setContentView(R.layout.activity_add_address);
 
         preference = new SharedPreference(this);
+        loader = new Loader(this);
 
         addressType = getIntent().getExtras().getString("Type");
 
@@ -52,7 +69,8 @@ public class AddressAddActivity extends AppCompatActivity{
         /*Toast.makeText(this, "All fields are mandatory", Toast.LENGTH_SHORT).show();*/
 
         if(addressType.equals("Update")){
-            position = getIntent().getExtras().getString("Position");
+            Bundle data = getIntent().getExtras();
+            a = (Address) data.getParcelable("Address");
             setData();
         }
         add.setOnClickListener(new View.OnClickListener() {
@@ -64,17 +82,14 @@ public class AddressAddActivity extends AppCompatActivity{
     }
 
     private void setData(){
-        RealmResults<UserDetails> details = RealmController.with(this).getUserAddress(preference.getUserId());
 
-        int pos = Integer.parseInt(position);
-
-        type.setText(details.get(pos).getAddressType());
-        address.setText(details.get(pos).getAddress());
-        landmark.setText(details.get(pos).getLandmark());
-        area.setText(details.get(pos).getArea());
-        city.setText(details.get(pos).getCity());
-        pincode.setText(details.get(pos).getPincode());
-        country.setText(details.get(pos).getCountry());
+        type.setText(a.getType());
+        address.setText(a.getLine1());
+        landmark.setText(a.getLandmark());
+        area.setText(a.getArea());
+        city.setText(a.getCity());
+        pincode.setText(a.getPincode());
+        country.setText(a.getCountry());
 
     }
 
@@ -102,40 +117,81 @@ public class AddressAddActivity extends AppCompatActivity{
             return;
         }
         if(addressType.equals("New")) {
-            UserDetails details = new UserDetails(
-                    UUID.randomUUID().toString(),
-                    preference.getUserId(),
-                    type.getText().toString(),
-                    address.getText().toString(),
-                    landmark.getText().toString(),
-                    area.getText().toString(),
-                    city.getText().toString(),
-                    pincode.getText().toString(),
-                    country.getText().toString(),
-                    System.currentTimeMillis(),
-                    System.currentTimeMillis()
-            );
-            RealmController.with(this).inertUserDetails(details);
-            Toast.makeText(this, "Address added against your profile.", Toast.LENGTH_SHORT).show();
-            finish();
+            insertAddress();
         }else if(addressType.equals("Update")){
-            UserDetails details = new UserDetails(
-                    null,
-                    preference.getUserId(),
-                    type.getText().toString(),
-                    address.getText().toString(),
-                    landmark.getText().toString(),
-                    area.getText().toString(),
-                    city.getText().toString(),
-                    pincode.getText().toString(),
-                    country.getText().toString(),
-                    null,
-                    System.currentTimeMillis()
-            );
-            RealmController.with(this).updateUserDetails(details, Integer.parseInt(position));
-            Toast.makeText(this, "Address updated against your profile.", Toast.LENGTH_SHORT).show();
-            finish();
+            updateAddress();
         }
+    }
+
+
+    private void updateAddress(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        UpdateAddressRequest request = new UpdateAddressRequest(
+                a.getTaskId(),
+                preference.getUserId(),
+                type.getText().toString(),
+                address.getText().toString(),
+                landmark.getText().toString(),
+                area.getText().toString(),
+                city.getText().toString(),
+                pincode.getText().toString(),
+                country.getText().toString()
+        );
+
+        Call<UploadFeedbackResponse> call = client.updateAddress(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    Toast.makeText(AddressAddActivity.this, "Address updated against your profile.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+
+
+    private void insertAddress(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        InsertAddressRequest request = new InsertAddressRequest(
+                preference.getUserId(),
+                type.getText().toString(),
+                address.getText().toString(),
+                landmark.getText().toString(),
+                area.getText().toString(),
+                city.getText().toString(),
+                pincode.getText().toString(),
+                country.getText().toString()
+        );
+
+        Call<UploadFeedbackResponse> call = client.insertAddress(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    Toast.makeText(AddressAddActivity.this, "Address updated against your profile.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
     }
 
 }

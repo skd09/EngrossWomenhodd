@@ -32,8 +32,22 @@ import com.sharvari.engrosswomenhodd.Fragments.UploadNewsFragment;
 import com.sharvari.engrosswomenhodd.Fragments.UploadTaskFragment;
 import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Requests.GetTaskRequest;
+import com.sharvari.engrosswomenhodd.Response.News.News;
+import com.sharvari.engrosswomenhodd.Response.News.NewsList;
+import com.sharvari.engrosswomenhodd.Response.UserDetails.GetUserData;
+import com.sharvari.engrosswomenhodd.Response.UserDetails.GetUserDetails;
+import com.sharvari.engrosswomenhodd.Services.Apis;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
 import com.sharvari.engrosswomenhodd.Utils.SharedPreference;
+
+import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity
@@ -43,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     private SharedPreference preference;
     private NavigationView navigationView;
     private Users user;
+    private Loader loader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,23 +67,17 @@ public class MainActivity extends AppCompatActivity
         preference = new SharedPreference(this);
 
         setSupportActionBar(toolbar);
+        loader = new Loader(this);
 
-        if(preference.isLoggedIn().equals("0")){
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
-            return;
-        }else {
             String ToastMessage = "";
 
-            if (getIntent().getExtras() != null && getIntent().getExtras().getString("Mode")!=null) {
-                if (getIntent().getExtras().getString("Mode").equals("Login")){
-                    ToastMessage = "Welcome back " + preference.getUserName();
-                } else if (getIntent().getExtras().getString("Mode").equals("Register")) {
-                    ToastMessage = "Warn welcome " + preference.getUserName() + ".\nThanks for joining us.";
-                }
-                Toast.makeText(this, ToastMessage, Toast.LENGTH_SHORT).show();
+        if (getIntent().getExtras() != null && getIntent().getExtras().getString("Mode")!=null) {
+            if (getIntent().getExtras().getString("Mode").equals("Login")){
+                ToastMessage = "Welcome back " + preference.getUserName();
+            } else if (getIntent().getExtras().getString("Mode").equals("Register")) {
+                ToastMessage = "Warm welcome " + preference.getUserName() + ".\nThanks for joining us.";
             }
+            Toast.makeText(this, ToastMessage, Toast.LENGTH_SHORT).show();
         }
 
 
@@ -85,14 +94,52 @@ public class MainActivity extends AppCompatActivity
 
 
         showFragment(new HomeFragment(),"Home");
-
-        setData();
+        getUserDetails();
+//        if(preference.getUserImage().equals("")){
+//            getUserDetails();
+//        }else{
+//            setData();
+//        }
 
 
     }
 
+    private void getUserDetails(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        GetTaskRequest request = new GetTaskRequest(preference.getUserId());
+
+        Call<GetUserDetails> call = client.getUserDetails(request);
+
+        call.enqueue(new Callback<GetUserDetails>() {
+            @Override
+            public void onResponse(Call<GetUserDetails> call, Response<GetUserDetails> response) {
+                if(response.body().getStatusCode().equals("0")){
+                    ArrayList<GetUserData> data = response.body().getData();
+                    if(data.size()>0) {
+
+                        preference.createLoginSession(
+                                data.get(0).getFullName().toString(),
+                                data.get(0).getMobile().toString(),
+                                data.get(0).getUserId().toString(),
+                                data.get(0).getPicture().toString(),
+                                data.get(0).getAccountType().toString());
+
+                    }
+                    setData();
+                }
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<GetUserDetails> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+    }
+
     private void setData(){
-        user = RealmController.with(this).getCustomerDetails(preference.getUserId());
 
         View headerLayout = navigationView.getHeaderView(0);
 
@@ -100,21 +147,25 @@ public class MainActivity extends AppCompatActivity
         TextView mobile = headerLayout.findViewById(R.id.login_mobile);
         ImageView imageView = headerLayout.findViewById(R.id.login_picture);
 
-        name.setText(user.getFullName());
-        mobile.setText(user.getCity());
-        if(user.getPicture().equals("1")){
+        name.setText(preference.getUserName());
+        mobile.setText(preference.getUserMobile());
+
+        if(preference.getUserImage().equals("1")){
             imageView.setImageDrawable(getResources().getDrawable(R.drawable.img_teenager));
-        }else if(user.getPicture().equals("2")){
+        }else if(preference.getUserImage().equals("2")){
             imageView.setImageDrawable(getResources().getDrawable(R.drawable.img_women));
-        }else if(user.getPicture().equals("3")){
+        }else if(preference.getUserImage().equals("3")){
             imageView.setImageDrawable(getResources().getDrawable(R.drawable.img_old));
         }
 
-        if(!user.getAccountType().equals("Admin")){
+        if(!preference.getUserMobile().equals("8286269039")){
             navigationView.getMenu().findItem(R.id.nav_upload_news).setVisible(false);
             navigationView.getMenu().findItem(R.id.nav_see_feedback).setVisible(false);
+
         }else{
             navigationView.getMenu().findItem(R.id.nav_feedback).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_task_upload).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_my_task).setVisible(false);
         }
 
     }

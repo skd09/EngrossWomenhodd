@@ -12,8 +12,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.sharvari.engrosswomenhodd.Pojos.SeeFeedback;
 import com.sharvari.engrosswomenhodd.R;
+import com.sharvari.engrosswomenhodd.Requests.UploadNewsRequest;
+import com.sharvari.engrosswomenhodd.Response.Feedback.GetFeedbackList;
+import com.sharvari.engrosswomenhodd.Response.Feedback.GetFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Response.UploadFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Services.Apis;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
+
+import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvaridivekar on 04/03/18.
@@ -24,6 +38,7 @@ public class UploadNewsFragment extends Fragment{
     private EditText title, story, url;
     private Button upload;
     private Context context;
+    private Loader loader;
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_upload_news, container, false);
@@ -32,6 +47,8 @@ public class UploadNewsFragment extends Fragment{
         story = v.findViewById(R.id.story);
         url = v.findViewById(R.id.url);
         context = getContext();
+
+        loader = new Loader(getContext());
 
         upload = v.findViewById(R.id.upload);
 
@@ -45,16 +62,38 @@ public class UploadNewsFragment extends Fragment{
                 if(t.isEmpty() && s.isEmpty() && u.isEmpty()){
                     Toast.makeText(context, "All fields are mandatory.", Toast.LENGTH_SHORT).show();
                 }else{
-                    RealmController.with(UploadNewsFragment.this).uploadNews(title.getText().toString(),
-                            story.getText().toString(),url.getText().toString());
-                    title.setText("");
-                    story.setText("");
-                    url.setText("");
-                    Toast.makeText(context, "Uploaded this news.", Toast.LENGTH_SHORT).show();
+                    OnUploadButton();
                 }
             }
         });
 
         return v;
+    }
+
+    private void OnUploadButton(){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+        UploadNewsRequest news = new UploadNewsRequest(
+                title.getText().toString(),
+                story.getText().toString(),
+                url.getText().toString()
+        );
+        Call<UploadFeedbackResponse> call = client.uploadNews(news);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                title.setText("");
+                story.setText("");
+                url.setText("");
+                Toast.makeText(context, "Uploaded this news.", Toast.LENGTH_SHORT).show();
+                loader.hideLoader();
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
     }
 }

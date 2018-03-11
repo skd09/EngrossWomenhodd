@@ -52,9 +52,12 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
             @Override
             public void onClick(View view) {
                 home home = homeArrayList.get(position);
+
                 Intent i = new Intent(context, ProfileActivity.class);
                 i.putExtra("UserId",home.getUserId());
                 i.putExtra("Location",home.getLocation());
+                i.putExtra("Page","Home");
+                i.putExtra("home", home);
                 context.startActivity(i);
             }
         });
@@ -63,9 +66,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>{
             public void onClick(View view) {
                 home home = homeArrayList.get(position);
                 Intent i = new Intent(context, TaskActivity.class);
-                i.putExtra("UserId",home.getUserId());
-                i.putExtra("TaskId",home.getId());
-                i.putExtra("Location",home.getLocation());
+                i.putExtra("home", home);
                 context.startActivity(i);
             }
         });

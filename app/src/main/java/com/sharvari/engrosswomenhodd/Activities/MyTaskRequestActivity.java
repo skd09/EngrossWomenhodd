@@ -18,13 +18,24 @@ import com.sharvari.engrosswomenhodd.Pojos.Request;
 import com.sharvari.engrosswomenhodd.R;
 import com.sharvari.engrosswomenhodd.Realm.TaskRequest;
 import com.sharvari.engrosswomenhodd.Realm.Users;
+import com.sharvari.engrosswomenhodd.Requests.AcceptTaskRequest;
+import com.sharvari.engrosswomenhodd.Requests.GetTaskHelpRequest;
+import com.sharvari.engrosswomenhodd.Response.TaskRequest.TaskRequestData;
+import com.sharvari.engrosswomenhodd.Response.TaskRequest.TaskRequestResponse;
+import com.sharvari.engrosswomenhodd.Response.UploadFeedbackResponse;
+import com.sharvari.engrosswomenhodd.Services.Apis;
 import com.sharvari.engrosswomenhodd.Utils.Generic;
+import com.sharvari.engrosswomenhodd.Utils.Loader;
 import com.sharvari.engrosswomenhodd.Utils.RealmController;
 import com.sharvari.engrosswomenhodd.Utils.RecyclerTouchListener;
+import com.sharvari.engrosswomenhodd.Utils.RetrofitClient;
 
 import java.util.ArrayList;
 
 import io.realm.RealmResults;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by sharvaridivekar on 08/03/18.
@@ -36,12 +47,14 @@ public class MyTaskRequestActivity extends AppCompatActivity{
     private MyTaskRequestAdapter adapter;
     private ArrayList<Request> requests = new ArrayList<>();
     private String taskId;
+    private Loader loader;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_my_task);
 
+        loader = new Loader(this);
         taskId = getIntent().getExtras().getString("TaskId");
 
         recyclerView = findViewById(R.id.recycler_view);
@@ -76,13 +89,8 @@ public class MyTaskRequestActivity extends AppCompatActivity{
         dialogBuilder.setTitle("Want to request?");
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                int code = RealmController.with(MyTaskRequestActivity.this).acceptRequest(requests.get(position).getId(),requests.get(position).getUserId());
-                if(code == 1)
-                    Toast.makeText(MyTaskRequestActivity.this, "Request approved.", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(MyTaskRequestActivity.this, "one request already approved.", Toast.LENGTH_SHORT).show();
+                acceptRequest(position);
                 dialog.dismiss();
-                finish();
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -96,30 +104,83 @@ public class MyTaskRequestActivity extends AppCompatActivity{
     }
 
     private void prepareData(){
+        requests.clear();
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
 
-        RealmResults<TaskRequest> r = RealmController.with(this).getRequest(taskId);
+        GetTaskHelpRequest request = new GetTaskHelpRequest(taskId);
 
-        for(TaskRequest t : r){
-            Users users = RealmController.with(this).getCustomerDetails(t.getUserId());
-            int requestCount = RealmController.with(this).getRequestCount(t.getTaskId());
-            Request request = new Request(
-                    t.getTaskId(),
-                    t.getUserId(),
-                    users.getFullName(),
-                    t.getIsAccepted(),
-                    Generic.with(this).dateFormat(t.getCreatedOn()),
-                    t.getPrice(),
-                    t.getComments(),
-                    users.getPicture()
+        Call<TaskRequestResponse> call = client.getTaskRequest(request);
 
-            );
-            requests.add(request);
+        call.enqueue(new Callback<TaskRequestResponse>() {
+            @Override
+            public void onResponse(Call<TaskRequestResponse> call, Response<TaskRequestResponse> response) {
+                if(response.body().getStatusCode().equals("0")) {
+                    loader.hideLoader();
+                    if (response.body().getTaskList().size() > 0) {
+                        ArrayList<TaskRequestData> data = response.body().getTaskList();
 
-        }
+                        for (TaskRequestData t : data) {
+                            Request request = new Request(
+                                    t.getTaskId(),
+                                    t.getUserId(),
+                                    t.getFullName(),
+                                    t.getIsAccepted().equals("F") ? "PENDING" : "ACCEPTED",
+                                    dateFormat(t.getCreatedOn()),
+                                    t.getPrice(),
+                                    t.getComments(),
+                                    t.getPicture(),
+                                    t.getTaskRequestId()
 
-        adapter.notifyDataSetChanged();
-        if(requests.size() == 0){
-            Toast.makeText(this, "No request yet against this task.", Toast.LENGTH_SHORT).show();
-        }
+                            );
+                            requests.add(request);
+                        }
+                        adapter.notifyDataSetChanged();
+
+                    }else{
+                        Toast.makeText(MyTaskRequestActivity.this, "No request yet registered against this task.", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TaskRequestResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+
+    }
+
+    private void acceptRequest(final int position){
+        loader.showLoader();
+        Apis client = RetrofitClient.getClient().create(Apis.class);
+
+        AcceptTaskRequest request = new AcceptTaskRequest(requests.get(position).getTaskDetailsId());
+
+        Call<UploadFeedbackResponse> call = client.acceptTaskRequest(request);
+
+        call.enqueue(new Callback<UploadFeedbackResponse>() {
+            @Override
+            public void onResponse(Call<UploadFeedbackResponse> call, Response<UploadFeedbackResponse> response) {
+                if(response.body().getStatusCode().equals("0")) {
+                    loader.hideLoader();
+                    Toast.makeText(MyTaskRequestActivity.this, "Request approved.", Toast.LENGTH_SHORT).show();
+                    prepareData();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UploadFeedbackResponse> call, Throwable t) {
+                loader.hideLoader();
+            }
+        });
+
+    }
+    private String dateFormat(String dateStr){
+
+        String[] format = dateStr.split(" ")[0].split("-");
+
+        String formatedDate = format[2] + "/" + format[1] + "/" + format[0];
+        return formatedDate;
     }
 }

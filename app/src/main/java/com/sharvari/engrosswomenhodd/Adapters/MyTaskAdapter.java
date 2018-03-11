@@ -50,6 +50,10 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
         holder.location.setText(task.getLocation());
         holder.amount.setText(task.getAmount());
 
+        if(task.getStatus().equals("COMPLETED")){
+            holder.status.setTextColor(context.getResources().getColor(R.color.colorGreen));
+        }
+
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,7 +68,7 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
             public void onClick(View view) {
                 MyTask myTask = arrayList.get(position);
                 Intent i = new Intent(context, UpdateMyTaskActivity.class);
-                i.putExtra("TaskId",myTask.getId());
+                i.putExtra("Task", myTask);
                 context.startActivity(i);
             }
         });
